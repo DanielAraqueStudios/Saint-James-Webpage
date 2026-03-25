@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ReleaseGrid } from "@/components/ReleaseGrid";
 import { TourSection } from "@/components/TourSection";
+import { Biography } from "@/components/Biography";
 import { Footer } from "@/components/Footer";
 
 export default function Home() {
@@ -14,7 +15,7 @@ export default function Home() {
         
         <div className="relative z-10 text-center px-4">
           <h1 className="text-7xl md:text-9xl font-bold uppercase tracking-tighter mix-blend-overlay text-white leading-none">
-            String<br/>Master
+            Santiago<br/>Leiva
           </h1>
           <p className="mt-6 text-lg md:text-2xl text-neutral-400 font-light tracking-wide max-w-2xl mx-auto">
             THE NEW ALBUM AND INTERACTIVE JOURNEY
@@ -29,6 +30,9 @@ export default function Home() {
 
       {/* Grid Filter Section (Martin Garrix inspiration: Clean, taxonomic grid) */}
       <ReleaseGrid />
+
+      {/* About/Bio Section with Spotify Avatar */}
+      <Biography />
 
       {/* Tour & Events Section */}
       <TourSection />

@@ -10,13 +10,13 @@ export function Footer() {
         {/* Brand Left */}
         <div className="flex flex-col max-w-sm">
           <h2 className="text-3xl font-bold uppercase tracking-widest text-white mb-6">
-            ARTIST<span className="text-neutral-600">_HQ</span>
+            Santiago<span className="text-neutral-600">Leiva</span>
           </h2>
           <p className="text-neutral-500 text-sm leading-relaxed mb-8">
             The official platform. New music, exclusive releases, and global tour updates directly from the source.
           </p>
           <div className="text-xs text-neutral-600 tracking-widest uppercase">
-            &copy; {new Date().getFullYear()} Official Artist. All rights reserved.
+            &copy; {new Date().getFullYear()} Santiago Leiva. All rights reserved.
           </div>
         </div>
 

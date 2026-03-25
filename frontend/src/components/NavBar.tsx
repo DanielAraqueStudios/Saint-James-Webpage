@@ -19,7 +19,7 @@ export function NavBar() {
     <>
       <nav className="fixed top-0 left-0 w-full z-50 mix-blend-difference text-white px-6 py-8 flex justify-between items-center bg-transparent">
         <Link href="/" className="text-2xl font-bold uppercase tracking-widest z-50 mix-blend-exclusion">
-          ARTIST<span className="text-neutral-500">_HQ</span>
+          Santiago<span className="text-neutral-500">Leiva</span>
         </Link>
         <button
           onClick={() => setIsOpen(!isOpen)}

@@ -10,7 +10,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Artist Official | Premium Platform",
+  title: "Santiago Leiva | Official Website",
   description: "Official releases, tour dates, and platform.",
 };
 

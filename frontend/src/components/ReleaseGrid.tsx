@@ -3,27 +3,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Mock JSON Data - This mimics a headless CMS structure
+// Real Spotify Public Playlists Extracted
 const releasesData = [
-  { id: 1, title: "Echoes of Time", type: "Album", year: 2026, cover: "bg-zinc-800" },
-  { id: 2, title: "Midnight Frequency", type: "Single", year: 2026, cover: "bg-zinc-700" },
-  { id: 3, title: "Solar Flare", type: "Single", year: 2026, cover: "bg-zinc-800" },
-  { id: 4, title: "Void Walker", type: "EP", year: 2025, cover: "bg-zinc-900" },
-  { id: 5, title: "Neon Gradients", type: "Album", year: 2025, cover: "bg-zinc-700" },
-  { id: 6, title: "Pulse", type: "Single", year: 2025, cover: "bg-zinc-800" },
-  { id: 7, title: "Resonance", type: "Single", year: 2024, cover: "bg-zinc-900" },
-  { id: 8, title: "The Beginning", type: "Album", year: 2024, cover: "bg-zinc-700" },
+  { id: 1, title: "Fresh EDM & House Remixes", type: "Playlist", year: 2026, cover: "bg-zinc-800", embedId: "1xv5fsl2bW1Iq6cTFKQwJf" },
+  { id: 2, title: "Techno Club 2026", type: "Playlist", year: 2026, cover: "bg-zinc-700", embedId: "0Ijh3qcWYkfBYnwWDC9kxQ" },
+  { id: 3, title: "This Is Sonny Wern", type: "Playlist", year: 2025, cover: "bg-zinc-800", embedId: "37i9dQZF1DZ06evO1lso1i" },
+  { id: 4, title: "My 2023 Playlist in a Bottle", type: "Playlist", year: 2023, cover: "bg-zinc-900", embedId: "2GMYqcpW41HzZOwE6Fpm6G" },
 ];
 
-const filters = ["All", "2026", "2025", "Albums", "Singles"];
+const filters = ["All", "2026", "2025", "2023", "Playlists"];
 
 export function ReleaseGrid() {
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filteredReleases = releasesData.filter((release) => {
     if (activeFilter === "All") return true;
-    if (activeFilter === "Albums") return release.type === "Album";
-    if (activeFilter === "Singles") return release.type === "Single" || release.type === "EP";
+    if (activeFilter === "Playlists") return release.type === "Playlist";
     return release.year.toString() === activeFilter;
   });
 
@@ -54,7 +49,7 @@ export function ReleaseGrid() {
         {/* Animated Grid */}
         <motion.div 
           layout 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8"
         >
           <AnimatePresence>
             {filteredReleases.map((item) => (
@@ -65,18 +60,19 @@ export function ReleaseGrid() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="group relative aspect-square overflow-hidden cursor-pointer bg-zinc-900"
+                className="group relative w-full overflow-hidden bg-zinc-900 rounded-lg"
               >
-                {/* Overlay data on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                  <span className="text-xs text-neutral-400 uppercase tracking-widest mb-1">
-                    {item.type} • {item.year}
-                  </span>
-                  <h3 className="text-xl font-bold text-white tracking-tight">{item.title}</h3>
-                </div>
-                
-                {/* Abstract image placeholder (would be next/image in production) */}
-                <div className={`absolute inset-0 ${item.cover} group-hover:scale-105 transition-transform duration-700 ease-out`} />
+                {/* Embedded Spotify Player with Dark Theme */}
+                <iframe 
+                  src={`https://open.spotify.com/embed/playlist/${item.embedId}?utm_source=generator&theme=0`} 
+                  width="100%" 
+                  height="352" 
+                  frameBorder="0" 
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                  loading="lazy"
+                  className="rounded-lg shadow-xl"
+                />
               </motion.div>
             ))}
           </AnimatePresence>
