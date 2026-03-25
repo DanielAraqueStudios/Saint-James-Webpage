@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --color-background: #000000;
+  --color-foreground: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply bg-zinc-950 text-neutral-50 antialiased selection:bg-white selection:text-black scroll-smooth;
+  }
+}
+
+/* Custom Utilities for Cinematic UI */
+.blend-difference {
+  mix-blend-mode: difference;
+}
+
+/* Hide scrollbar for clean aesthetic */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
