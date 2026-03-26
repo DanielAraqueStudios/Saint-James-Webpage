@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   output: 'export',
+  basePath: '/Saint-James-Webpage',
   images: {
     unoptimized: true,
     remotePatterns: [
