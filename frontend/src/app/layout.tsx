@@ -10,8 +10,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Santiago Leiva | Official Website",
-  description: "Official releases, tour dates, and platform.",
+  title: "Saints Productions | Official Platform",
+  description: "Sonic architecture and production services.",
 };
 
 export default function RootLayout({
@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${spaceGrotesk.variable} font-sans min-h-screen bg-zinc-950 text-white flex flex-col`}>
+      <body suppressHydrationWarning className={`${spaceGrotesk.variable} font-sans min-h-screen bg-saint-matte-black text-saint-white flex flex-col`}>
         <NavBar />
         <main className="flex-1">{children}</main>
       </body>

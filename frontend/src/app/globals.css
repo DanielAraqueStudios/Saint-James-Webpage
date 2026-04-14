@@ -2,13 +2,27 @@
 
 @theme {
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --color-background: #000000;
-  --color-foreground: #ffffff;
+  
+  /* Saints Productions Palette */
+  --color-saint-vivid-black: #000000;
+  --color-saint-matte-black: #0f0f0f;
+  --color-saint-dark-blue: #050A0F;
+  --color-saint-navy: #002243;
+  --color-saint-charcoal: #353235;
+  --color-saint-gray: #586F7C;
+  --color-saint-light: #B6C0CE;
+  --color-saint-white: #ffffff;
+  --color-saint-blue: #2563EB; /* Default blue, adjustable */
+  --color-saint-light-blue: #60A5FA; /* Default light blue, adjustable */
+  --color-saint-purple: #9333EA; /* Default purple, adjustable */
+
+  --color-background: var(--color-saint-matte-black);
+  --color-foreground: var(--color-saint-white);
 }
 
 @layer base {
   body {
-    @apply bg-zinc-950 text-neutral-50 antialiased selection:bg-white selection:text-black scroll-smooth;
+    @apply bg-saint-matte-black text-saint-white antialiased selection:bg-saint-purple selection:text-white scroll-smooth;
   }
 }
 
@@ -22,11 +36,11 @@
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: var(--color-saint-dark);
 }
 ::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: var(--color-saint-charcoal); /* 353235 */
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: var(--color-saint-gray); /* 586F7C */
 }
