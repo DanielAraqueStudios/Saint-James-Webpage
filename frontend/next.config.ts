@@ -1,16 +1,23 @@
 import type { NextConfig } from "next";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
-  output: 'export',
-  basePath: '/Saint-James-Webpage',
+  turbopack: {
+    root: projectRoot,
+  },
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'i.scdn.co',
+        protocol: "https",
+        hostname: "i.scdn.co",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
       },
     ],
   },

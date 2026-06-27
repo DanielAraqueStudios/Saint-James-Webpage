@@ -1,20 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-gotu), Gotu, var(--font-baskervville), Baskervville, ui-sans-serif, system-ui, sans-serif;
+  --font-title: "Avenir Next", Avenir, var(--font-gotu), ui-sans-serif, system-ui, sans-serif;
+  --font-alt-text: var(--font-baskervville), Baskervville, Georgia, serif;
+  --font-accent: var(--font-alt-text);
   
   /* Saints Productions Palette */
-  --color-saint-vivid-black: #000000;
-  --color-saint-matte-black: #0f0f0f;
-  --color-saint-dark-blue: #050A0F;
-  --color-saint-navy: #002243;
-  --color-saint-charcoal: #353235;
-  --color-saint-gray: #586F7C;
-  --color-saint-light: #B6C0CE;
+  --color-saint-deep-blue: #1A6189;
+  --color-saint-teal: #38A89C;
+  --color-saint-pale-cyan: #ABDFEB;
+  --color-saint-purple: #492264;
+
+  /* Compatibility aliases for the current component layer */
+  --color-saint-vivid-black: #07151E;
+  --color-saint-matte-black: #0D1F2A;
+  --color-saint-dark-blue: #102D3F;
+  --color-saint-navy: var(--color-saint-deep-blue);
+  --color-saint-charcoal: #21485C;
+  --color-saint-gray: #80B8C2;
+  --color-saint-light: var(--color-saint-pale-cyan);
   --color-saint-white: #ffffff;
-  --color-saint-blue: #2563EB; /* Default blue, adjustable */
-  --color-saint-light-blue: #60A5FA; /* Default light blue, adjustable */
-  --color-saint-purple: #9333EA; /* Default purple, adjustable */
+  --color-saint-blue: var(--color-saint-deep-blue);
+  --color-saint-light-blue: var(--color-saint-teal);
 
   --color-background: var(--color-saint-matte-black);
   --color-foreground: var(--color-saint-white);
@@ -23,6 +31,15 @@
 @layer base {
   body {
     @apply bg-saint-matte-black text-saint-white antialiased selection:bg-saint-purple selection:text-white scroll-smooth;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-title;
   }
 }
 
@@ -36,11 +53,11 @@
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-saint-dark);
+  background: var(--color-saint-dark-blue);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-saint-charcoal); /* 353235 */
+  background: var(--color-saint-charcoal);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-saint-gray); /* 586F7C */
+  background: var(--color-saint-gray);
 }

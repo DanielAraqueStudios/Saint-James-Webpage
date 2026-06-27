@@ -1,7 +1,15 @@
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 export function Footer() {
-  const socials = ["Instagram", "Twitter", "Spotify", "Apple Music", "Soundcloud", "YouTube"];
+  const socials = ["Instagram", "X", "YouTube"];
+  const navLinks = [
+    { name: "Home", href: "/" },
+    { name: "About Us", href: "/about" },
+    { name: "Services", href: "/services" },
+    { name: "Our Sounds", href: "/sounds" },
+    { name: "Contact Us", href: "/contact" },
+  ];
 
   return (
     <footer className="w-full bg-black py-20 px-6 md:px-12 border-t border-zinc-900">
@@ -10,13 +18,13 @@ export function Footer() {
         {/* Brand Left */}
         <div className="flex flex-col max-w-sm">
           <h2 className="text-3xl font-bold uppercase tracking-widest text-white mb-6">
-            Santiago<span className="text-neutral-600">Leiva</span>
+            Saints<span className="text-saint-teal">Productions</span>
           </h2>
           <p className="text-neutral-500 text-sm leading-relaxed mb-8">
-            The official platform. New music, exclusive releases, and global tour updates directly from the source.
+            Sonic architecture, music production, and audio identity for stories that need a distinct voice.
           </p>
           <div className="text-xs text-neutral-600 tracking-widest uppercase">
-            &copy; {new Date().getFullYear()} Santiago Leiva. All rights reserved.
+            &copy; {new Date().getFullYear()} Saints Productions. All rights reserved.
           </div>
         </div>
 
@@ -25,11 +33,15 @@ export function Footer() {
           {/* Internal Navigation */}
           <div className="flex flex-col space-y-4">
             <span className="text-xs text-white font-bold uppercase tracking-widest mb-2">Explore</span>
-            <a href="#releases" className="text-sm text-neutral-400 hover:text-white transition-colors">Releases</a>
-            <a href="#tour" className="text-sm text-neutral-400 hover:text-white transition-colors">Tour Dates</a>
-            <a href="#shop" className="text-sm text-neutral-400 hover:text-white transition-colors">Merch Store</a>
-            <a href="#about" className="text-sm text-neutral-400 hover:text-white transition-colors">Biography</a>
-            <a href="#" className="text-sm text-neutral-400 hover:text-white transition-colors">Contact</a>
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="text-sm text-neutral-400 hover:text-white transition-colors"
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
 
           {/* Socials Ecosystem */}

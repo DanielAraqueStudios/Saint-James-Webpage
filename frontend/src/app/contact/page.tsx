@@ -9,7 +9,7 @@ export default function Contact() {
       <div className="max-w-4xl mx-auto w-full px-6 flex-grow flex flex-col items-center justify-center text-center">
         
         <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-widest text-saint-white">
-          Let's <span className="text-saint-blue">Connect</span>
+          Let&apos;s <span className="text-saint-blue">Connect</span>
         </h1>
         <p className="mt-8 text-saint-light max-w-2xl text-xl leading-relaxed mb-16">
           Reach out to inquire about our services or start a conversation about shaping your next sonic experience.

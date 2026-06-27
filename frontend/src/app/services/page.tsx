@@ -12,6 +12,8 @@ type ServiceData = {
   producer: string;
 };
 
+type ServiceValue = ServiceData[keyof ServiceData];
+
 export default function Services() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<ServiceData>({
@@ -21,7 +23,7 @@ export default function Services() {
     producer: "",
   });
 
-  const updateData = (key: keyof ServiceData, value: any) => {
+  const updateData = (key: keyof ServiceData, value: ServiceValue) => {
     setData((prev) => ({ ...prev, [key]: value }));
   };
 

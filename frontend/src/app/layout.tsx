@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Baskervville, Gotu } from "next/font/google";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 
-const spaceGrotesk = Space_Grotesk({
+const gotu = Gotu({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-gotu",
+  weight: "400",
+});
+
+const baskervville = Baskervville({
+  subsets: ["latin"],
+  variable: "--font-baskervville",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body suppressHydrationWarning className={`${spaceGrotesk.variable} font-sans min-h-screen bg-saint-matte-black text-saint-white flex flex-col`}>
+      <body suppressHydrationWarning className={`${gotu.variable} ${baskervville.variable} font-sans min-h-screen bg-saint-matte-black text-saint-white flex flex-col`}>
         <NavBar />
         <main className="flex-1">{children}</main>
       </body>

@@ -1,64 +1,84 @@
-# Santiago Leiva | Official Artist Platform 🎵
+# Saints Productions | Official Web Platform
 
-A cinematic, high-performance web portfolio for electronic music artist **Santiago Leiva**. Combining the bold, industrial aesthetic of top-tier techno visual identities with a highly interactive, taxonomic layout for music releases and tour dates.
+A cinematic web platform for **Saints Productions**, built with Next.js, TypeScript, and Tailwind CSS. The site presents the collective, services, sound portfolio, and contact paths for clients looking for music production, composition, mixing, mastering, and sonic identity work.
 
-![Next.js](https://img.shields.io/badge/Next.js-14+-black?logo=next.js&style=for-the-badge)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white&style=for-the-badge)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white&style=for-the-badge)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-white?logo=framer&logoColor=black&style=for-the-badge)
-![Deployment](https://img.shields.io/badge/Deployment-GitHub_Pages-2EA44F?logo=github&style=for-the-badge)
+## Current Direction
 
-## ✨ Key Features
+The project is moving from an artist-portfolio prototype into a production-services brand site. The next implementation pass should align all pages, components, and documentation around the Saints Productions identity.
 
-- **Cinematic Dark Mode**: A custom `zinc-950` design system that provides a premium, immersive user experience.
-- **Live Spotify Integration**: Taxonomic music grid that dynamically renders real playable Spotify iframes to showcase releases and playlists directly in the UI.
-- **Fluid Interactions**: App-wide animations, layout crossfades, and interactive overlay menus orchestrated by Framer Motion.
-- **Tour Engine**: Structured and responsive gig-listing with dynamic states (e.g., Sold Out notifications) and ticket hooks.
-- **Static & Fast**: Architected for static export (`output: 'export'`), enabling global CDN distribution and robust hosting via GitHub Pages.
+## Visual System
 
-## 🛠️ Tech Stack
+### Color Palette
 
-- **Framework:** [Next.js (App Router)](https://nextjs.org/) / React
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
-- **Animation:** [Framer Motion](https://www.framer.com/motion/)
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **DevOps:** Automations via GitHub Actions & custom Python scripts
+| Token | Hex | Suggested Use |
+| --- | --- | --- |
+| Deep Blue | `#1A6189` | Primary brand color, headings, key UI accents |
+| Teal | `#38A89C` | Secondary actions, highlights, hover states |
+| Pale Cyan | `#ABDFEB` | Soft surfaces, supporting accents, light text moments |
+| Purple | `#492264` | Premium accent, contrast details, selected states |
 
-## 🚀 Getting Started (Local Development)
+### Typography
 
-You can easily run this project locally using the custom Python orchestrator, which automatically manages environment paths and boots the Node server.
+| Role | Font |
+| --- | --- |
+| Titles | Avenir Next |
+| Body Text | Gotu |
+| Alternative Text | Baskervville |
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- Python 3.x
+Note: **Avenir Next** is commonly available as a licensed/system font, not a free Google Font. During implementation, the site should use a proper licensed/self-hosted copy if available, with a clean fallback stack. **Gotu** is the main body text font, and **Baskervville** is the alternate text font for editorial or contrast moments.
 
-### Run Local Environment
-1. Clone the repository to your machine.
-2. Ensure you are in the root directory.
-3. Run the custom orchestrator script:
-   ```bash
-   python run_dev.py
-   ```
+## Tech Stack
 
-*Alternatively, if you prefer the standard Node.js workflow:*
+- **Framework:** Next.js App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **Animation:** Framer Motion
+- **Icons:** Lucide React
+- **Deployment Target:** Next.js production server on Railway
+
+## Local Development
+
+From the repository root:
+
 ```bash
-cd frontend
-npm install   # Installs all required dependencies
-npm run dev   # Starts the development server at localhost:3000
+python run_dev.py
 ```
 
-## 📦 Deployment (Production)
+To test the production server locally:
 
-This application has a fully automated CI/CD pipeline integrated with **GitHub Pages**.
+```bash
+python run_dev.py --prod
+```
 
-- Pushing code to the `main` or `master` branch triggers the GitHub Action (`.github/workflows/deploy.yml`).
-- The pipeline securely installs dependencies, builds the Next.js static output, and deploys it live.
+Or with the standard Node workflow:
 
-> **Note:** If you plan to switch to a Server-Side Rendered (SSR) environment like Vercel or a Node VPS in the future, please consult the `frontend/DEPLOYMENT.md` documentation for migration steps.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
----
+Open `http://localhost:3000` in your browser.
 
-<p align="center">
-  <i>Designed & Engineered meticulously for the global stage.</i>
-</p>
+## Production Build And Start
+
+```bash
+cd frontend
+npm run build
+npm run start
+```
+
+The project is now configured for production Next.js hosting rather than GitHub Pages static export. On Railway, configure the service with:
+
+- **Root Directory:** `/frontend`
+- **Build Command:** `npm run build`
+- **Start Command:** `npm run start`
+
+This keeps Next.js running as a server, so the app can use normal production Next.js behavior instead of being limited to static files.
+
+## Architecture Notes
+
+- Brand content should be centralized before the next major UI pass.
+- Placeholder links for WhatsApp, Calendly, email, and social platforms should be replaced before production.
+- Legacy Santiago Leiva and artist-tour content should be removed or rewritten for Saints Productions.
+- Lint should be added to CI before deployment so quality issues are caught automatically.

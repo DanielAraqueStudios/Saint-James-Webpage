@@ -1,0 +1,7 @@
+.env
+node_modules/
+backend/dist/
+backend/uploads/
+admin/.next/
+frontend/.next/
+*.local
