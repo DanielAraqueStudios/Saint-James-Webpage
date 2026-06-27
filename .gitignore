@@ -9,3 +9,6 @@ frontend/.next/
 # Claude Code / Ruflo
 .claude/
 CLAUDE.md
+.claude-flow/
+.swarm/
+ruvector.db
