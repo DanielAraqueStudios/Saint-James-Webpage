@@ -5,3 +5,7 @@ backend/uploads/
 admin/.next/
 frontend/.next/
 *.local
+
+# Claude Code / Ruflo
+.claude/
+CLAUDE.md
