@@ -12,6 +12,6 @@ RUN cp -r src/db/migrations dist/db/migrations
 
 RUN mkdir -p uploads
 
-EXPOSE 4000
+EXPOSE 8080
 
 CMD ["npm", "run", "start"]
