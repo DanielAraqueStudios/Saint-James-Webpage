@@ -50,11 +50,15 @@ export const api = {
   deleteTrack: (id: number) =>
     request<{ deleted: boolean }>(`/api/tracks/${id}`, { method: "DELETE" }),
 
-  getCategories: () => request<string[]>("/api/categories"),
+  getCategories: () => request<Category[]>("/api/categories"),
   createCategory: (name: string) =>
     request<{ name: string }>("/api/categories", {
       method: "POST",
       body: JSON.stringify({ name }),
+    }),
+  deleteCategory: (name: string) =>
+    request<{ deleted: boolean }>(`/api/categories/${encodeURIComponent(name)}`, {
+      method: "DELETE",
     }),
 };
 
@@ -65,6 +69,11 @@ export type Producer = {
   role: string;
   image_url: string;
   bio: string[];
+};
+
+export type Category = {
+  name: string;
+  track_count: number;
 };
 
 export type Track = {

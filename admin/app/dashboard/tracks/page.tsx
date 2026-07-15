@@ -13,7 +13,7 @@ export default function TracksPage() {
 
   useEffect(() => {
     api.getTracks().then(setTracks);
-    api.getCategories().then(setCategories);
+    api.getCategories().then((cats) => setCategories(cats.map((c) => c.name)));
   }, []);
 
   const producers = [...new Set(tracks.map((t) => t.producer_slug))];

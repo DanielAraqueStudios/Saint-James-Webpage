@@ -29,6 +29,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: "/dashboard/producers", label: "Producers" },
     { href: "/dashboard/tracks", label: "Tracks" },
     { href: "/dashboard/tracks/upload", label: "Upload Track" },
+    { href: "/dashboard/categories", label: "Categories" },
   ];
 
   const sidebarContent = (

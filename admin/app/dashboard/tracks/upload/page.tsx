@@ -26,8 +26,9 @@ export default function UploadTrackPage() {
       if (p.length > 0) setProducerSlug(p[0].slug);
     });
     api.getCategories().then((cats) => {
-      setCategories(cats);
-      setCategorySelect(cats.length > 0 ? cats[0] : NEW_CATEGORY);
+      const names = cats.map((c) => c.name);
+      setCategories(names);
+      setCategorySelect(names.length > 0 ? names[0] : NEW_CATEGORY);
     });
   }, []);
 
