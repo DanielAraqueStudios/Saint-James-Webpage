@@ -7,11 +7,34 @@ export default function ProducersPage() {
   const [producers, setProducers] = useState<Producer[]>([]);
   const [editing, setEditing] = useState<Producer | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
     api.getProducers().then(setProducers);
   }, []);
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!editing) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setMsg("");
+    try {
+      const form = new FormData();
+      form.append("image", file);
+      const updated = await api.uploadProducerImage(editing.slug, form);
+      setEditing({ ...editing, image_url: updated.image_url });
+      setProducers((prev) => prev.map((p) => (p.slug === updated.slug ? updated : p)));
+      setMsg("Image uploaded.");
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Image upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
 
   async function handleSave() {
     if (!editing) return;
@@ -47,7 +70,29 @@ export default function ProducersPage() {
             <Field label="Name" value={editing.name} onChange={(v) => setEditing({ ...editing, name: v })} />
             <Field label="Full Name" value={editing.full_name} onChange={(v) => setEditing({ ...editing, full_name: v })} />
             <Field label="Role" value={editing.role} onChange={(v) => setEditing({ ...editing, role: v })} />
-            <Field label="Image URL" value={editing.image_url} onChange={(v) => setEditing({ ...editing, image_url: v })} />
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Image</label>
+              <div className="flex items-center gap-4">
+                {editing.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={editing.image_url}
+                    alt={editing.full_name}
+                    className="w-20 h-20 rounded-lg object-cover border border-gray-700"
+                  />
+                )}
+                <label className="cursor-pointer text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors">
+                  {uploading ? "Uploading…" : "Upload image"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Bio (one paragraph per line)</label>
               <textarea

@@ -5,6 +5,7 @@ import { api, Track } from "@/lib/api";
 
 export default function TracksPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editData, setEditData] = useState({ title: "", category: "" });
   const [msg, setMsg] = useState("");
@@ -12,10 +13,17 @@ export default function TracksPage() {
 
   useEffect(() => {
     api.getTracks().then(setTracks);
+    api.getCategories().then(setCategories);
   }, []);
 
   const producers = [...new Set(tracks.map((t) => t.producer_slug))];
   const visible = filterProducer ? tracks.filter((t) => t.producer_slug === filterProducer) : tracks;
+
+  const grouped = visible.reduce<Record<string, Track[]>>((acc, t) => {
+    (acc[t.category] ??= []).push(t);
+    return acc;
+  }, {});
+  const sortedCategories = Object.keys(grouped).sort();
 
   async function handleDelete(id: number) {
     if (!confirm("Delete this track?")) return;
@@ -49,50 +57,59 @@ export default function TracksPage() {
         </select>
       </div>
 
-      <div className="space-y-2">
-        {visible.map((t) => (
-          <div key={t.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            {editingId === t.id ? (
-              <div className="flex gap-3 items-center flex-wrap">
-                <input
-                  value={editData.title}
-                  onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-                  placeholder="Title"
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm flex-1"
-                />
-                <input
-                  value={editData.category}
-                  onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                  placeholder="Category"
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm w-36"
-                />
-                <button onClick={() => handleSave(t.id)} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm">Save</button>
-                <button onClick={() => setEditingId(null)} className="bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm">Cancel</button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <span className="font-medium truncate">{t.title}</span>
-                  <span className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">{t.category}</span>
-                  <span className="text-xs text-blue-400">{t.producer_slug}</span>
-                  <span className="text-xs text-gray-500 uppercase">{t.format}</span>
+      <div className="space-y-6">
+        {sortedCategories.map((cat) => (
+          <div key={cat}>
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">{cat}</h3>
+            <div className="space-y-2">
+              {grouped[cat].map((t) => (
+                <div key={t.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                  {editingId === t.id ? (
+                    <div className="flex gap-3 items-center flex-wrap">
+                      <input
+                        value={editData.title}
+                        onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                        placeholder="Title"
+                        className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm flex-1"
+                      />
+                      <select
+                        value={editData.category}
+                        onChange={(e) => setEditData({ ...editData, category: e.target.value })}
+                        className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm w-36"
+                      >
+                        {categories.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                      <button onClick={() => handleSave(t.id)} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm">Save</button>
+                      <button onClick={() => setEditingId(null)} className="bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm">Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="font-medium truncate">{t.title}</span>
+                        <span className="text-xs text-blue-400">{t.producer_slug}</span>
+                        <span className="text-xs text-gray-500 uppercase">{t.format}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { setEditingId(t.id); setEditData({ title: t.title, category: t.category }); }}
+                          className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(t.id)}
+                          className="text-sm bg-red-900 hover:bg-red-800 text-white px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setEditingId(t.id); setEditData({ title: t.title, category: t.category }); }}
-                    className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(t.id)}
-                    className="text-sm bg-red-900 hover:bg-red-800 text-white px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         ))}
         {visible.length === 0 && <p className="text-gray-500">No tracks yet.</p>}

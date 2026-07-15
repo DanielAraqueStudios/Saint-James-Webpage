@@ -3,42 +3,59 @@
 import { useEffect, useState, useRef } from "react";
 import { api, Producer } from "@/lib/api";
 
+const NEW_CATEGORY = "__new__";
+
 export default function UploadTrackPage() {
   const [producers, setProducers] = useState<Producer[]>([]);
   const [producerSlug, setProducerSlug] = useState("");
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categorySelect, setCategorySelect] = useState("");
+  const [newCategory, setNewCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const category = categorySelect === NEW_CATEGORY ? newCategory : categorySelect;
+
   useEffect(() => {
     api.getProducers().then((p) => {
       setProducers(p);
       if (p.length > 0) setProducerSlug(p[0].slug);
+    });
+    api.getCategories().then((cats) => {
+      setCategories(cats);
+      setCategorySelect(cats.length > 0 ? cats[0] : NEW_CATEGORY);
     });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) { setError("Please select a file"); return; }
+    if (!category.trim()) { setError("Please choose or create a category"); return; }
     setError("");
     setMsg("");
     setUploading(true);
 
-    const form = new FormData();
-    form.append("file", file);
-    form.append("title", title);
-    form.append("category", category);
-    form.append("producer_slug", producerSlug);
-
     try {
+      if (categorySelect === NEW_CATEGORY && !categories.includes(category)) {
+        await api.createCategory(category);
+        setCategories((prev) => [...prev, category].sort());
+      }
+
+      const form = new FormData();
+      form.append("file", file);
+      form.append("title", title);
+      form.append("category", category);
+      form.append("producer_slug", producerSlug);
       await api.uploadTrack(form);
+
       setMsg("Track uploaded successfully!");
       setTitle("");
-      setCategory("");
+      setCategorySelect(category);
+      setNewCategory("");
       setFile(null);
       if (fileRef.current) fileRef.current.value = "";
     } catch (err) {
@@ -83,14 +100,26 @@ export default function UploadTrackPage() {
 
         <div>
           <label className="block text-sm text-gray-400 mb-1">Category</label>
-          <input
-            type="text"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="e.g. Cinematic, Hip-Hop, Electronic"
+          <select
+            value={categorySelect}
+            onChange={(e) => setCategorySelect(e.target.value)}
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-            required
-          />
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+            <option value={NEW_CATEGORY}>+ New category…</option>
+          </select>
+          {categorySelect === NEW_CATEGORY && (
+            <input
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="e.g. Cinematic, Hip-Hop, Electronic"
+              className="w-full mt-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              required
+            />
+          )}
         </div>
 
         <div>

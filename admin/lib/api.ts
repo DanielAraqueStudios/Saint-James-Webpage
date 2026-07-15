@@ -1,4 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-7783.up.railway.app";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -36,6 +36,8 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(data),
     }),
+  uploadProducerImage: (slug: string, form: FormData) =>
+    request<Producer>(`/api/producers/${slug}/image`, { method: "POST", body: form }),
 
   getTracks: (params?: { producer?: string; category?: string }) => {
     const qs = new URLSearchParams(params as Record<string, string>).toString();
@@ -47,6 +49,13 @@ export const api = {
     request<Track>(`/api/tracks/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteTrack: (id: number) =>
     request<{ deleted: boolean }>(`/api/tracks/${id}`, { method: "DELETE" }),
+
+  getCategories: () => request<string[]>("/api/categories"),
+  createCategory: (name: string) =>
+    request<{ name: string }>("/api/categories", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
 };
 
 export type Producer = {

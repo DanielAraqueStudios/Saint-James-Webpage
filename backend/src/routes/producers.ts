@@ -1,8 +1,37 @@
 import { Router, Request, Response } from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { pool } from "../db/client";
 import { requireAuth, AuthRequest } from "../middleware/auth";
 
 const router = Router();
+
+const storage = multer.diskStorage({
+  destination: (req, _file, cb) => {
+    const dir = path.join(process.cwd(), "uploads", "producers", req.params.slug);
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (_req, file, cb) => {
+    const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+    cb(null, `${Date.now()}_${safe}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only .jpg, .jpeg, .png, .webp and .gif files are allowed"));
+    }
+  },
+});
 
 router.get("/", async (_req: Request, res: Response) => {
   const result = await pool.query(
@@ -50,5 +79,30 @@ router.put("/:slug", requireAuth, async (req: AuthRequest, res: Response) => {
   }
   res.json(result.rows[0]);
 });
+
+router.post(
+  "/:slug/image",
+  requireAuth,
+  upload.single("image"),
+  async (req: AuthRequest, res: Response) => {
+    if (!req.file) {
+      res.status(400).json({ error: "image file is required" });
+      return;
+    }
+
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/producers/${req.params.slug}/${req.file.filename}`;
+
+    const result = await pool.query(
+      `UPDATE producers SET image_url = $1 WHERE slug = $2 RETURNING *`,
+      [imageUrl, req.params.slug]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: "Producer not found" });
+      return;
+    }
+    res.json(result.rows[0]);
+  }
+);
 
 export default router;
