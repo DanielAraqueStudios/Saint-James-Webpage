@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: var(--font-gotu), Gotu, var(--font-baskervville), Baskervville, ui-sans-serif, system-ui, sans-serif;
-  --font-title: "Avenir Next", Avenir, var(--font-gotu), ui-sans-serif, system-ui, sans-serif;
+  --font-title: var(--font-avenir-next), "Avenir Next", Avenir, var(--font-gotu), ui-sans-serif, system-ui, sans-serif;
   --font-alt-text: var(--font-baskervville), Baskervville, Georgia, serif;
   --font-accent: var(--font-alt-text);
   
@@ -13,11 +13,11 @@
   --color-saint-purple: #492264;
 
   /* Compatibility aliases for the current component layer */
-  --color-saint-vivid-black: #07151E;
-  --color-saint-matte-black: #0D1F2A;
-  --color-saint-dark-blue: #102D3F;
+  --color-saint-vivid-black: #333333;
+  --color-saint-matte-black: #353535;
+  --color-saint-dark-blue: #353535;
   --color-saint-navy: var(--color-saint-deep-blue);
-  --color-saint-charcoal: #21485C;
+  --color-saint-charcoal: #353535;
   --color-saint-gray: #80B8C2;
   --color-saint-light: var(--color-saint-pale-cyan);
   --color-saint-white: #ffffff;
