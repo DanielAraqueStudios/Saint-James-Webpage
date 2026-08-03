@@ -8,6 +8,7 @@ import authRouter from "./routes/auth";
 import producersRouter from "./routes/producers";
 import tracksRouter from "./routes/tracks";
 import categoriesRouter from "./routes/categories";
+import heroVideoRouter from "./routes/hero-video";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -21,6 +22,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/producers", producersRouter);
 app.use("/api/tracks", tracksRouter);
 app.use("/api/categories", categoriesRouter);
+app.use("/api/hero-video", heroVideoRouter);
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 

@@ -79,6 +79,10 @@ export const api = {
     request<{ deleted: boolean }>(`/api/categories/${encodeURIComponent(name)}`, {
       method: "DELETE",
     }),
+
+  getHeroVideo: () => request<HeroVideo | null>("/api/hero-video"),
+  uploadHeroVideo: (form: FormData) =>
+    request<HeroVideo>("/api/hero-video", { method: "POST", body: form }),
 };
 
 export type Producer = {
@@ -103,4 +107,10 @@ export type Track = {
   filename: string;
   format: "wav" | "mp3";
   created_at: string;
+};
+
+export type HeroVideo = {
+  video_url: string;
+  format: string;
+  updated_at: string;
 };
