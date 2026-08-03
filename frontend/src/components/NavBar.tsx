@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
@@ -8,6 +8,15 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 40);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -20,7 +29,12 @@ export function NavBar() {
   return (
     <>
       <nav className="fixed top-0 left-0 w-full z-50 text-white px-nav-inset-sm md:px-nav-inset-lg py-8 flex justify-between items-center bg-transparent">
-        <Link href="/" className="z-50 flex items-center">
+        <Link
+          href="/"
+          className={`z-50 flex items-center transition-opacity duration-300 ${
+            scrolled ? "opacity-0 pointer-events-none sm:opacity-100 sm:pointer-events-auto" : "opacity-100"
+          }`}
+        >
           <Image src="/logo.png" alt="Saints Productions" width={752} height={846} priority className="h-nav-logo w-auto object-contain" />
         </Link>
         <div className="flex items-center gap-6 z-50">
