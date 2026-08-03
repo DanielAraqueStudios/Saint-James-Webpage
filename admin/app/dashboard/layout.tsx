@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { ConsolePanel } from "@/components/ConsolePanel";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -100,7 +101,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {sidebarContent}
       </aside>
 
-      <main className="flex-1 p-4 md:p-8 text-white min-w-0">{children}</main>
+      <main className="flex-1 p-4 md:p-8 pb-16 text-white min-w-0">{children}</main>
+      <ConsolePanel />
     </div>
   );
 }
