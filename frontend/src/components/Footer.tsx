@@ -22,7 +22,7 @@ export function Footer() {
       <div className="w-full flex flex-col md:flex-row justify-between items-start gap-16">
 
         {/* Brand Left */}
-        <div className="flex flex-row items-start gap-5 max-w-sm">
+        <div className="flex flex-row items-start gap-8 max-w-sm">
           <Image
             src="/footer_logo.png"
             alt="Saints Productions"
