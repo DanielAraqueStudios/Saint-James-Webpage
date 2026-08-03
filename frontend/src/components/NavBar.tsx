@@ -19,7 +19,7 @@ export function NavBar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-50 text-white px-6 py-8 flex justify-between items-center bg-transparent">
+      <nav className="fixed top-0 left-0 w-full z-50 text-white px-footer-inset-sm md:px-footer-inset-lg py-8 flex justify-between items-center bg-transparent">
         <Link href="/" className="z-50 flex items-center">
           <Image src="/logo.png" alt="Saints Productions" width={752} height={846} priority className="h-nav-logo w-auto object-contain" />
         </Link>
