@@ -26,8 +26,8 @@ export function Footer() {
           <Image
             src="/footer_logo.png"
             alt="Saints Productions"
-            width={367}
-            height={560}
+            width={556}
+            height={852}
             className="h-footer-logo w-auto flex-shrink-0 object-contain object-left"
           />
           <div className="flex flex-col">
