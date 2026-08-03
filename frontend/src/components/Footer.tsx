@@ -22,19 +22,21 @@ export function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-16">
         
         {/* Brand Left */}
-        <div className="flex flex-col max-w-sm">
+        <div className="flex flex-row items-start gap-5 max-w-sm">
           <Image
             src="/footer_logo.png"
             alt="Saints Productions"
             width={160}
             height={160}
-            className="h-14 w-14 mb-6"
+            className="h-14 w-14 flex-shrink-0"
           />
-          <p className="text-neutral-500 text-sm leading-relaxed mb-8">
-            Sonic architecture, music production, and audio identity for stories that need a distinct voice.
-          </p>
-          <div className="text-xs text-neutral-600 tracking-widest uppercase">
-            &copy; {new Date().getFullYear()} Saints Productions. All rights reserved.
+          <div className="flex flex-col">
+            <p className="text-neutral-500 text-sm leading-relaxed mb-8">
+              Sonic architecture, music production, and audio identity for stories that need a distinct voice.
+            </p>
+            <div className="text-xs text-neutral-600 tracking-widest uppercase">
+              &copy; {new Date().getFullYear()} Saints Productions. All rights reserved.
+            </div>
           </div>
         </div>
 
