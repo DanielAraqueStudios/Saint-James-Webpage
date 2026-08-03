@@ -22,12 +22,22 @@ export function NavBar() {
         <Link href="/" className="text-2xl font-bold uppercase tracking-widest z-50">
           Saints<span className="text-saint-purple">Productions</span>
         </Link>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="z-50 p-2 hover:scale-105 transition-transform text-white"
-        >
-          {isOpen ? <X size={32} /> : <Menu size={32} />}
-        </button>
+        <div className="flex items-center gap-6 z-50">
+          <a
+            href={process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin-production-6328.up.railway.app"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline-block text-sm uppercase tracking-widest border border-white/30 rounded-full px-5 py-2 hover:bg-white hover:text-black transition-colors"
+          >
+            Admin
+          </a>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 hover:scale-105 transition-transform text-white"
+          >
+            {isOpen ? <X size={32} /> : <Menu size={32} />}
+          </button>
+        </div>
       </nav>
 
       <AnimatePresence>
@@ -56,6 +66,20 @@ export function NavBar() {
                   </Link>
                 </motion.li>
               ))}
+              <motion.li
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + navLinks.length * 0.1, duration: 0.5 }}
+              >
+                <a
+                  href={process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin-production-6328.up.railway.app"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl md:text-3xl font-bold uppercase tracking-tighter text-saint-gray hover:text-saint-purple transition-colors"
+                >
+                  Admin
+                </a>
+              </motion.li>
             </ul>
             <motion.div 
                initial={{ opacity: 0 }}

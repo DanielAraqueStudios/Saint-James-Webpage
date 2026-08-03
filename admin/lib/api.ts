@@ -1,3 +1,5 @@
+import { pushToast } from "./toast";
+
 const BASE = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-7783.up.railway.app";
 
 function getToken(): string | null {
@@ -15,9 +17,19 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers["Content-Type"] = "application/json";
   }
 
-  const res = await fetch(`${BASE}${path}`, { ...init, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, { ...init, headers });
+  } catch {
+    const message = `Network error calling ${path} — is the backend reachable?`;
+    pushToast("error", message);
+    throw new Error(message);
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
+    const message = `${init.method || "GET"} ${path} failed (${res.status}): ${err.error || "Request failed"}`;
+    pushToast("error", message);
     throw new Error(err.error || "Request failed");
   }
   return res.json() as Promise<T>;
