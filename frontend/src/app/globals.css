@@ -26,6 +26,10 @@
 
   --color-background: var(--color-saint-matte-black);
   --color-foreground: var(--color-saint-white);
+
+  /* Logo sizing — change here to resize across the whole site */
+  --spacing-nav-logo: 3rem;
+  --spacing-footer-logo: 9rem;
 }
 
 @layer base {

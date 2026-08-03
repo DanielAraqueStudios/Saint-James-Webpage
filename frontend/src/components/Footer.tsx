@@ -28,7 +28,7 @@ export function Footer() {
             alt="Saints Productions"
             width={367}
             height={560}
-            className="h-20 w-auto flex-shrink-0 object-contain object-left"
+            className="h-footer-logo w-auto flex-shrink-0 object-contain object-left"
           />
           <div className="flex flex-col">
             <p className="text-neutral-500 text-sm leading-relaxed mb-8">

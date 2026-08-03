@@ -21,7 +21,7 @@ export function NavBar() {
     <>
       <nav className="fixed top-0 left-0 w-full z-50 text-white px-6 py-8 flex justify-between items-center bg-transparent">
         <Link href="/" className="z-50 flex items-center">
-          <Image src="/logo.png" alt="Saints Productions" width={160} height={160} priority className="h-10 w-10 md:h-12 md:w-12" />
+          <Image src="/logo.png" alt="Saints Productions" width={160} height={160} priority className="h-nav-logo w-nav-logo" />
         </Link>
         <div className="flex items-center gap-6 z-50">
           <a
