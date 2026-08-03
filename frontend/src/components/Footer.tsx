@@ -2,7 +2,12 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 export function Footer() {
-  const socials = ["Instagram", "X", "YouTube"];
+  const socials = [
+    { name: "Instagram", href: "https://www.instagram.com/saintsproductions.music?igsh=MXZ4bWpubzgwejI2ZA%3D%3D&utm_source=qr" },
+    { name: "YouTube", href: "https://youtube.com/@saintsproductions-music?si=uEku2rWkQkzB-shv" },
+    { name: "Facebook", href: "https://www.facebook.com/share/1ER5HNGEoP/?mibextid=wwXIfr" },
+    { name: "TikTok", href: "https://www.tiktok.com/@saintsproductions.music?_r=1&_t=ZS-98aIYZb9xOm" },
+  ];
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "About Us", href: "/about" },
@@ -48,12 +53,14 @@ export function Footer() {
           <div className="flex flex-col space-y-4">
             <span className="text-xs text-white font-bold uppercase tracking-widest mb-2">Connect</span>
             {socials.map((social) => (
-              <a 
-                key={social} 
-                href="#" 
+              <a
+                key={social.name}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group flex items-center gap-1 text-sm text-neutral-400 hover:text-white transition-colors"
               >
-                {social}
+                {social.name}
                 <ArrowUpRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </a>
             ))}
