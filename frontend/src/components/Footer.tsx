@@ -19,7 +19,7 @@ export function Footer() {
 
   return (
     <footer className="w-full bg-black py-20 px-6 md:px-12 border-t border-zinc-900">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-16">
+      <div className="w-full flex flex-col md:flex-row justify-between items-start gap-16">
 
         {/* Brand Left */}
         <div className="flex flex-row items-start gap-5 max-w-sm">
