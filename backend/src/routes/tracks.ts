@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 },
+  limits: { fileSize: 300 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const allowed = [".wav", ".mp3"];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -55,7 +55,23 @@ router.get("/", async (req: Request, res: Response) => {
   res.json(result.rows);
 });
 
-router.post("/", requireAuth, upload.single("file"), async (req: AuthRequest, res: Response) => {
+router.post("/", requireAuth, (req: AuthRequest, res: Response, next) => {
+  upload.single("file")(req, res, (err: unknown) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        res.status(413).json({ error: "File is too large. Maximum size is 300MB." });
+        return;
+      }
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    if (err) {
+      res.status(400).json({ error: err instanceof Error ? err.message : "Upload failed" });
+      return;
+    }
+    next();
+  });
+}, async (req: AuthRequest, res: Response) => {
   const { title, category, producer_slug } = req.body as {
     title?: string;
     category?: string;

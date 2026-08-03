@@ -24,6 +24,11 @@ app.use("/api/categories", categoriesRouter);
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
+app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+});
+
 async function start() {
   await runMigrations();
   await runSeed();
