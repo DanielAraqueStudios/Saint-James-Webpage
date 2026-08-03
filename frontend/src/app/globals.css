@@ -28,8 +28,12 @@
   --color-foreground: var(--color-saint-white);
 
   /* Logo sizing — change here to resize across the whole site */
-  --spacing-nav-logo: 10rem;
+  --spacing-nav-logo: 7rem;
   --spacing-footer-logo: 20rem;
+
+  /* Footer side inset — change here to adjust the gap from the screen edge */
+  --spacing-footer-inset-sm: 2rem;
+  --spacing-footer-inset-lg: 4rem;
 }
 
 @layer base {

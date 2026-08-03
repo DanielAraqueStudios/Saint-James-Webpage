@@ -18,7 +18,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="w-full bg-black py-20 px-6 md:px-12 border-t border-zinc-900">
+    <footer className="w-full bg-black py-20 px-footer-inset-sm md:px-footer-inset-lg border-t border-zinc-900">
       <div className="w-full flex flex-col md:flex-row justify-between items-start gap-16">
 
         {/* Brand Left */}
