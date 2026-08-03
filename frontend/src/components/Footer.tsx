@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
 export function Footer() {
@@ -22,9 +23,13 @@ export function Footer() {
         
         {/* Brand Left */}
         <div className="flex flex-col max-w-sm">
-          <h2 className="text-3xl font-bold uppercase tracking-widest text-white mb-6">
-            Saints<span className="text-saint-teal">Productions</span>
-          </h2>
+          <Image
+            src="/footer_logo.png"
+            alt="Saints Productions"
+            width={160}
+            height={160}
+            className="h-14 w-14 mb-6"
+          />
           <p className="text-neutral-500 text-sm leading-relaxed mb-8">
             Sonic architecture, music production, and audio identity for stories that need a distinct voice.
           </p>
