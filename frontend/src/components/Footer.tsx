@@ -19,18 +19,18 @@ export function Footer() {
 
   return (
     <footer className="w-full bg-black py-20 px-6 md:px-12 border-t border-zinc-900">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-stretch gap-16">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-16">
 
         {/* Brand Left */}
-        <div className="flex flex-row items-stretch gap-5 max-w-sm">
+        <div className="flex flex-row items-start gap-5 max-w-sm">
           <Image
             src="/footer_logo.png"
             alt="Saints Productions"
             width={367}
             height={560}
-            className="h-full w-auto flex-shrink-0 object-contain object-left"
+            className="h-20 w-auto flex-shrink-0 object-contain object-left"
           />
-          <div className="flex flex-col justify-between">
+          <div className="flex flex-col">
             <p className="text-neutral-500 text-sm leading-relaxed mb-8">
               Sonic architecture, music production, and audio identity for stories that need a distinct voice.
             </p>
