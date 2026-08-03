@@ -33,7 +33,7 @@
 
   /* Footer side inset — change here to adjust the gap from the screen edge */
   --spacing-footer-inset-sm: 2rem;
-  --spacing-footer-inset-lg: 4rem;
+  --spacing-footer-inset-lg: 20rem;
 }
 
 @layer base {
