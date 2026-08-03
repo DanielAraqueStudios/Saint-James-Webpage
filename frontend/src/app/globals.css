@@ -33,7 +33,11 @@
 
   /* Footer side inset — change here to adjust the gap from the screen edge */
   --spacing-footer-inset-sm: 2rem;
-  --spacing-footer-inset-lg: 20rem;
+  --spacing-footer-inset-lg: 5rem;
+
+  /* Navbar side inset — independent from the footer inset above */
+  --spacing-nav-inset-sm: 2rem;
+  --spacing-nav-inset-lg: 5rem;
 }
 
 @layer base {
