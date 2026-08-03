@@ -38,14 +38,6 @@ export function NavBar() {
           <Image src="/logo.png" alt="Saints Productions" width={752} height={846} priority className="h-nav-logo w-auto object-contain" />
         </Link>
         <div className="flex items-center gap-6 z-50">
-          <a
-            href={process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin-production-6328.up.railway.app"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:flex h-nav-logo items-center justify-center text-sm uppercase tracking-widest border border-white/30 rounded-full px-5 hover:bg-white hover:text-black transition-colors"
-          >
-            Admin
-          </a>
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="h-nav-logo flex items-center justify-center hover:scale-105 transition-transform text-white"
@@ -81,20 +73,6 @@ export function NavBar() {
                   </Link>
                 </motion.li>
               ))}
-              <motion.li
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + navLinks.length * 0.1, duration: 0.5 }}
-              >
-                <a
-                  href={process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin-production-6328.up.railway.app"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-2xl md:text-3xl font-bold uppercase tracking-tighter text-saint-gray hover:text-saint-purple transition-colors"
-                >
-                  Admin
-                </a>
-              </motion.li>
             </ul>
             <motion.div 
                initial={{ opacity: 0 }}
