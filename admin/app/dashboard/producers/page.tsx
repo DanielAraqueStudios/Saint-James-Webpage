@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api, Producer } from "@/lib/api";
+import { PhoneNumberInput, isValidStoredNumber } from "@/components/PhoneNumberInput";
 
 const EMPTY_NEW = {
   slug: "",
@@ -49,6 +50,10 @@ export default function ProducersPage() {
 
   async function handleSave() {
     if (!editing) return;
+    if (!isValidStoredNumber(editing.whatsapp_number || "")) {
+      setMsg("Please enter a valid WhatsApp number, or clear the field");
+      return;
+    }
     setSaving(true);
     setMsg("");
     try {
@@ -74,6 +79,10 @@ export default function ProducersPage() {
   async function handleCreate() {
     if (!newProducer.slug.trim() || !newProducer.name.trim() || !newProducer.full_name.trim() || !newProducer.role.trim()) {
       setMsg("Slug, name, full name and role are required");
+      return;
+    }
+    if (!isValidStoredNumber(newProducer.whatsapp_number)) {
+      setMsg("Please enter a valid WhatsApp number, or leave it blank");
       return;
     }
     setSaving(true);
@@ -132,7 +141,11 @@ export default function ProducersPage() {
           <Field label="Name" value={newProducer.name} onChange={(v) => setNewProducer({ ...newProducer, name: v })} />
           <Field label="Full Name" value={newProducer.full_name} onChange={(v) => setNewProducer({ ...newProducer, full_name: v })} />
           <Field label="Role" value={newProducer.role} onChange={(v) => setNewProducer({ ...newProducer, role: v })} />
-          <Field label="WhatsApp Number (digits only, e.g. 573159461469)" value={newProducer.whatsapp_number} onChange={(v) => setNewProducer({ ...newProducer, whatsapp_number: v })} />
+          <PhoneNumberInput
+            label="WhatsApp Number"
+            value={newProducer.whatsapp_number}
+            onChange={(v) => setNewProducer({ ...newProducer, whatsapp_number: v })}
+          />
           <Field label="Calendar / Scheduling Link" value={newProducer.calendar_url} onChange={(v) => setNewProducer({ ...newProducer, calendar_url: v })} />
           <div className="flex gap-3 pt-2">
             <button
@@ -157,8 +170,8 @@ export default function ProducersPage() {
             <Field label="Name" value={editing.name} onChange={(v) => setEditing({ ...editing, name: v })} />
             <Field label="Full Name" value={editing.full_name} onChange={(v) => setEditing({ ...editing, full_name: v })} />
             <Field label="Role" value={editing.role} onChange={(v) => setEditing({ ...editing, role: v })} />
-            <Field
-              label="WhatsApp Number (digits only, e.g. 573159461469)"
+            <PhoneNumberInput
+              label="WhatsApp Number"
               value={editing.whatsapp_number || ""}
               onChange={(v) => setEditing({ ...editing, whatsapp_number: v || null })}
             />
