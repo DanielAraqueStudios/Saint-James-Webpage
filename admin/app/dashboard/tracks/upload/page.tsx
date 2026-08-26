@@ -5,6 +5,7 @@ import { api, Producer } from "@/lib/api";
 
 const NEW_CATEGORY = "__new__";
 const NO_CATEGORY = "";
+const MAX_SIZE_MB = 300;
 
 export default function UploadTrackPage() {
   const [producers, setProducers] = useState<Producer[]>([]);
@@ -35,6 +36,10 @@ export default function UploadTrackPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) { setError("Please select a file"); return; }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setError(`File is too large (${(file.size / 1024 / 1024).toFixed(0)}MB). Maximum size is ${MAX_SIZE_MB}MB.`);
+      return;
+    }
     if (categorySelect === NEW_CATEGORY && !newCategory.trim()) {
       setError("Please enter a name for the new category");
       return;

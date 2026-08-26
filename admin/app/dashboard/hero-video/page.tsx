@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { api, HeroVideo } from "@/lib/api";
 
+const MAX_SIZE_MB = 300;
+
 export default function HeroVideoPage() {
   const [video, setVideo] = useState<HeroVideo | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -18,6 +20,10 @@ export default function HeroVideoPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) { setError("Please select a video file"); return; }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setError(`File is too large (${(file.size / 1024 / 1024).toFixed(0)}MB). Maximum size is ${MAX_SIZE_MB}MB.`);
+      return;
+    }
     setError("");
     setMsg("");
     setUploading(true);
