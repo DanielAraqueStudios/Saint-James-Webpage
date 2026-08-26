@@ -3,9 +3,20 @@
 import { useEffect, useState } from "react";
 import { api, Producer } from "@/lib/api";
 
+const EMPTY_NEW = {
+  slug: "",
+  name: "",
+  full_name: "",
+  role: "",
+  whatsapp_number: "",
+  calendar_url: "",
+};
+
 export default function ProducersPage() {
   const [producers, setProducers] = useState<Producer[]>([]);
   const [editing, setEditing] = useState<Producer | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [newProducer, setNewProducer] = useState(EMPTY_NEW);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
@@ -47,6 +58,8 @@ export default function ProducersPage() {
         role: editing.role,
         image_url: editing.image_url,
         bio: editing.bio,
+        whatsapp_number: editing.whatsapp_number,
+        calendar_url: editing.calendar_url,
       });
       setProducers((prev) => prev.map((p) => (p.slug === updated.slug ? updated : p)));
       setEditing(null);
@@ -58,18 +71,102 @@ export default function ProducersPage() {
     }
   }
 
+  async function handleCreate() {
+    if (!newProducer.slug.trim() || !newProducer.name.trim() || !newProducer.full_name.trim() || !newProducer.role.trim()) {
+      setMsg("Slug, name, full name and role are required");
+      return;
+    }
+    setSaving(true);
+    setMsg("");
+    try {
+      const created = await api.createProducer({
+        slug: newProducer.slug.trim().toLowerCase(),
+        name: newProducer.name,
+        full_name: newProducer.full_name,
+        role: newProducer.role,
+        whatsapp_number: newProducer.whatsapp_number || undefined,
+        calendar_url: newProducer.calendar_url || undefined,
+      });
+      setProducers((prev) => [...prev, created].sort((a, b) => a.slug.localeCompare(b.slug)));
+      setCreating(false);
+      setNewProducer(EMPTY_NEW);
+      setMsg("Producer created. Add an image and bio via Edit.");
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Create failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(slug: string) {
+    if (!confirm(`Remove producer "${slug}"? This also deletes their uploaded tracks and images.`)) return;
+    setMsg("");
+    try {
+      await api.deleteProducer(slug);
+      setProducers((prev) => prev.filter((p) => p.slug !== slug));
+      setMsg("Producer removed.");
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Delete failed");
+    }
+  }
+
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-8">Producers</h2>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold">Producers</h2>
+        {!editing && !creating && (
+          <button
+            onClick={() => setCreating(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+          >
+            + New Producer
+          </button>
+        )}
+      </div>
       {msg && <p className="mb-4 text-green-400 text-sm">{msg}</p>}
 
-      {editing ? (
+      {creating ? (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl space-y-4">
+          <h3 className="text-xl font-semibold mb-2">New Producer</h3>
+          <Field label={'Slug (used in URLs, e.g. "santi")'} value={newProducer.slug} onChange={(v) => setNewProducer({ ...newProducer, slug: v })} />
+          <Field label="Name" value={newProducer.name} onChange={(v) => setNewProducer({ ...newProducer, name: v })} />
+          <Field label="Full Name" value={newProducer.full_name} onChange={(v) => setNewProducer({ ...newProducer, full_name: v })} />
+          <Field label="Role" value={newProducer.role} onChange={(v) => setNewProducer({ ...newProducer, role: v })} />
+          <Field label="WhatsApp Number (digits only, e.g. 573159461469)" value={newProducer.whatsapp_number} onChange={(v) => setNewProducer({ ...newProducer, whatsapp_number: v })} />
+          <Field label="Calendar / Scheduling Link" value={newProducer.calendar_url} onChange={(v) => setNewProducer({ ...newProducer, calendar_url: v })} />
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={handleCreate}
+              disabled={saving}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              {saving ? "Creating…" : "Create"}
+            </button>
+            <button
+              onClick={() => { setCreating(false); setNewProducer(EMPTY_NEW); }}
+              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : editing ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
           <h3 className="text-xl font-semibold mb-4">Edit — {editing.slug}</h3>
           <div className="space-y-4">
             <Field label="Name" value={editing.name} onChange={(v) => setEditing({ ...editing, name: v })} />
             <Field label="Full Name" value={editing.full_name} onChange={(v) => setEditing({ ...editing, full_name: v })} />
             <Field label="Role" value={editing.role} onChange={(v) => setEditing({ ...editing, role: v })} />
+            <Field
+              label="WhatsApp Number (digits only, e.g. 573159461469)"
+              value={editing.whatsapp_number || ""}
+              onChange={(v) => setEditing({ ...editing, whatsapp_number: v || null })}
+            />
+            <Field
+              label="Calendar / Scheduling Link"
+              value={editing.calendar_url || ""}
+              onChange={(v) => setEditing({ ...editing, calendar_url: v || null })}
+            />
             <div>
               <label className="block text-sm text-gray-400 mb-1">Image</label>
               <div className="flex items-center gap-4">
@@ -85,13 +182,14 @@ export default function ProducersPage() {
                   {uploading ? "Uploading…" : "Upload image"}
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.avif,.svg,.bmp,.tiff,.tif"
                     onChange={handleImageUpload}
                     disabled={uploading}
                     className="hidden"
                   />
                 </label>
               </div>
+              <p className="text-xs text-gray-500 mt-1">Supports JPG, PNG, WebP, GIF, AVIF, SVG, BMP and TIFF.</p>
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Bio (one paragraph per line)</label>
@@ -126,13 +224,24 @@ export default function ProducersPage() {
               <div>
                 <p className="font-semibold">{p.full_name}</p>
                 <p className="text-sm text-gray-400">{p.role}</p>
+                {!p.whatsapp_number && !p.calendar_url && (
+                  <p className="text-xs text-yellow-500 mt-1">No WhatsApp/calendar link set yet</p>
+                )}
               </div>
-              <button
-                onClick={() => setEditing(p)}
-                className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors"
-              >
-                Edit
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEditing(p)}
+                  className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(p.slug)}
+                  className="text-sm bg-red-900/50 hover:bg-red-900 text-red-200 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>

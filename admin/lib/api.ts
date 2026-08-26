@@ -50,11 +50,27 @@ export const api = {
     }),
 
   getProducers: () => request<Producer[]>("/api/producers"),
+  createProducer: (data: {
+    slug: string;
+    name: string;
+    full_name: string;
+    role: string;
+    image_url?: string;
+    bio?: string[];
+    whatsapp_number?: string;
+    calendar_url?: string;
+  }) =>
+    request<Producer>("/api/producers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
   updateProducer: (slug: string, data: Partial<Producer>) =>
     request<Producer>(`/api/producers/${slug}`, {
       method: "PUT",
       body: JSON.stringify(data),
     }),
+  deleteProducer: (slug: string) =>
+    request<{ deleted: boolean }>(`/api/producers/${slug}`, { method: "DELETE" }),
   uploadProducerImage: (slug: string, form: FormData) =>
     request<Producer>(`/api/producers/${slug}/image`, { method: "POST", body: form }),
 
@@ -92,6 +108,8 @@ export type Producer = {
   role: string;
   image_url: string;
   bio: string[];
+  whatsapp_number: string | null;
+  calendar_url: string | null;
 };
 
 export type Category = {
