@@ -53,12 +53,12 @@ export default function Contact() {
 
           {/* Email Action */}
           <a
-            href="mailto:contact@saintsproductions.com" // Cambiar al mail real
+            href="mailto:contact.saintsproductions@gmail.com"
             className="flex flex-col items-center justify-center p-12 border border-saint-charcoal rounded-3xl hover:bg-saint-charcoal hover:scale-105 transition-all duration-300 group"
           >
             <Mail size={48} className="text-saint-blue mb-6 group-hover:text-saint-white transition-colors" />
             <h2 className="text-2xl font-bold uppercase tracking-widest mb-2">Email</h2>
-            <p className="text-saint-gray">contact@saintsproductions.com</p>
+            <p className="text-saint-gray">contact.saintsproductions@gmail.com</p>
           </a>
         </div>
 
