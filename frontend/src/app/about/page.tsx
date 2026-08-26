@@ -1,14 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Footer } from "@/components/Footer";
-import { AudioGallery } from "@/components/AudioGallery";
-import { getProducers, getTracks } from "@/lib/api";
+import { getProducers } from "@/lib/api";
 
 export default async function About() {
-  const [producers, tracks] = await Promise.all([
-    getProducers().catch(() => []),
-    getTracks().catch(() => []),
-  ]);
+  const producers = await getProducers().catch(() => []);
 
   return (
     <div className="min-h-screen bg-saint-matte-black pt-32 pb-16 flex flex-col justify-between">
@@ -50,21 +46,6 @@ export default async function About() {
             </div>
           ))}
         </div>
-
-        {/* All sounds section */}
-        {tracks.length > 0 && (
-          <div className="mt-32">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-widest">
-                The <span className="text-saint-light-blue">Sound</span>
-              </h2>
-              <p className="mt-3 text-saint-gray max-w-xl mx-auto">
-                Explore tracks from all producers — filter by category and listen directly.
-              </p>
-            </div>
-            <AudioGallery tracks={tracks} producers={producers} showProducerTag />
-          </div>
-        )}
       </div>
 
       <div className="mt-20">

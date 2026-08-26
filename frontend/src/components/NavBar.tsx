@@ -28,16 +28,16 @@ export function NavBar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-50 text-white px-nav-inset-sm md:px-nav-inset-lg py-8 flex justify-between items-center bg-transparent">
+      <nav className="fixed top-0 left-0 w-full z-50 text-white px-nav-inset-sm md:px-nav-inset-lg py-8 flex justify-between items-center bg-transparent pointer-events-none">
         <Link
           href="/"
-          className={`z-50 flex items-center transition-opacity duration-300 ${
+          className={`z-50 flex items-center transition-opacity duration-300 pointer-events-auto ${
             scrolled ? "opacity-0 pointer-events-none sm:opacity-100 sm:pointer-events-auto" : "opacity-100"
           }`}
         >
           <Image src="/logo.png" alt="Saints Productions" width={752} height={846} priority className="h-nav-logo w-auto object-contain" />
         </Link>
-        <div className="flex items-center gap-6 z-50">
+        <div className="flex items-center gap-6 z-50 pointer-events-auto">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="h-nav-logo flex items-center justify-center hover:scale-105 transition-transform text-white"

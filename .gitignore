@@ -9,6 +9,15 @@ frontend/.next/
 # Claude Code / Ruflo
 .claude/
 CLAUDE.md
+AGENTS.md
 .claude-flow/
 .swarm/
+.mcp.json
 ruvector.db
+
+# Ruflo local secrets and runtime data
+.env.local
+.env.*.local
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
