@@ -16,6 +16,8 @@ const producers = [
       "For Santiago, music extends far beyond sound itself. It is about emotion, meaning, and connection.",
       "Through Saint's Productions, he is committed to crafting meaningful musical experiences and building artistic worlds that leave a lasting impact.",
     ],
+    whatsapp_number: "573159461469",
+    calendar_url: "https://calendar.app.google/2QahZY23jDCMHPjZ6",
   },
   {
     slug: "ethan",
@@ -30,6 +32,8 @@ const producers = [
       "While his influences span countless genres and musical traditions, Ethan draws inspiration from any music that demonstrates exceptional artistry and craftsmanship.",
       "For Ethan, music is far more than a profession—it is an essential part of life itself.",
     ],
+    whatsapp_number: "14062005117",
+    calendar_url: null as string | null,
   },
   {
     slug: "trace",
@@ -45,16 +49,18 @@ const producers = [
       "His creative philosophy centers on imperfection as a defining characteristic of meaningful music.",
       "While fully embracing the convenience of digital production, Trace consistently incorporates analog elements into his workflow.",
     ],
+    whatsapp_number: "13072504417",
+    calendar_url: null as string | null,
   },
 ];
 
 export async function runSeed() {
   for (const p of producers) {
     await pool.query(
-      `INSERT INTO producers (slug, name, full_name, role, image_url, bio)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO producers (slug, name, full_name, role, image_url, bio, whatsapp_number, calendar_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (slug) DO NOTHING`,
-      [p.slug, p.name, p.full_name, p.role, p.image_url, p.bio]
+      [p.slug, p.name, p.full_name, p.role, p.image_url, p.bio, p.whatsapp_number, p.calendar_url]
     );
   }
   console.log("Producers seeded.");
