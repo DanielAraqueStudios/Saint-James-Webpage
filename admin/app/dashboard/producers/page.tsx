@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, Producer } from "@/lib/api";
 import { PhoneNumberInput, isValidStoredNumber } from "@/components/PhoneNumberInput";
+import { UrlInput, isValidUrl } from "@/components/UrlInput";
 
 const EMPTY_NEW = {
   slug: "",
@@ -54,6 +55,10 @@ export default function ProducersPage() {
       setMsg("Please enter a valid WhatsApp number, or clear the field");
       return;
     }
+    if (!isValidUrl(editing.calendar_url || "")) {
+      setMsg("Please enter a valid calendar link (starting with http:// or https://), or clear the field");
+      return;
+    }
     setSaving(true);
     setMsg("");
     try {
@@ -83,6 +88,10 @@ export default function ProducersPage() {
     }
     if (!isValidStoredNumber(newProducer.whatsapp_number)) {
       setMsg("Please enter a valid WhatsApp number, or leave it blank");
+      return;
+    }
+    if (!isValidUrl(newProducer.calendar_url)) {
+      setMsg("Please enter a valid calendar link (starting with http:// or https://), or leave it blank");
       return;
     }
     setSaving(true);
@@ -146,7 +155,11 @@ export default function ProducersPage() {
             value={newProducer.whatsapp_number}
             onChange={(v) => setNewProducer({ ...newProducer, whatsapp_number: v })}
           />
-          <Field label="Calendar / Scheduling Link" value={newProducer.calendar_url} onChange={(v) => setNewProducer({ ...newProducer, calendar_url: v })} />
+          <UrlInput
+            label="Calendar / Scheduling Link"
+            value={newProducer.calendar_url}
+            onChange={(v) => setNewProducer({ ...newProducer, calendar_url: v })}
+          />
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleCreate}
@@ -175,7 +188,7 @@ export default function ProducersPage() {
               value={editing.whatsapp_number || ""}
               onChange={(v) => setEditing({ ...editing, whatsapp_number: v || null })}
             />
-            <Field
+            <UrlInput
               label="Calendar / Scheduling Link"
               value={editing.calendar_url || ""}
               onChange={(v) => setEditing({ ...editing, calendar_url: v || null })}
