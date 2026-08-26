@@ -20,6 +20,10 @@ const PRODUCER_WHATSAPP: Record<string, string> = {
   Trace: "13072504417",
 };
 
+const PRODUCER_CALENDAR: Record<string, string> = {
+  Santi: "https://calendar.app.google/2QahZY23jDCMHPjZ6",
+};
+
 export default function Services() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<ServiceData>({
@@ -45,6 +49,7 @@ export default function Services() {
   };
 
   const whatsappNumber = PRODUCER_WHATSAPP[data.producer] || PRODUCER_WHATSAPP.Santi;
+  const calendarLink = PRODUCER_CALENDAR[data.producer] || PRODUCER_CALENDAR.Santi;
 
   const generateLeadMessage = () => {
     return `Hello Saints Productions! I would like to start a project with the following details:%0A
@@ -252,7 +257,7 @@ Please let me know the next steps to schedule our interview!`;
 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
                   <a
-                    href="https://calendly.com" // Update to actual scheduling link
+                    href={calendarLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-3 bg-saint-white text-saint-vivid-black py-5 px-6 rounded-xl font-bold uppercase tracking-widest hover:bg-saint-light transition-colors"
