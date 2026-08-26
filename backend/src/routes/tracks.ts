@@ -59,6 +59,12 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", requireAuth, (req: AuthRequest, res: Response, next) => {
   upload.single("file")(req, res, (err: unknown) => {
+    if (err) {
+      // On error, multer/busboy may have stopped reading partway through the
+      // upload. Draining the rest of the incoming body prevents the socket
+      // from hanging/resetting, which otherwise can take out the whole server.
+      req.resume();
+    }
     if (err instanceof multer.MulterError) {
       if (err.code === "LIMIT_FILE_SIZE") {
         res.status(413).json({ error: "File is too large. Maximum size is 300MB." });
