@@ -31,10 +31,26 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
 });
 
+// Large file uploads (hero video, tracks) can legitimately take minutes on a
+// slow connection. Without this, a single big/slow upload could crash or hang
+// the whole process and take down every other endpoint until the platform
+// restarts the container. Log and keep serving instead of dying silently.
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception (server kept alive):", err);
+});
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled rejection (server kept alive):", err);
+});
+
 async function start() {
   await runMigrations();
   await runSeed();
-  app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+  const server = app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+
+  // Node's default requestTimeout (5 min) can abort a large, slow upload
+  // mid-stream. Give uploads room to finish instead of hitting that ceiling.
+  server.requestTimeout = 20 * 60 * 1000; // 20 minutes
+  server.headersTimeout = 20 * 60 * 1000 + 5000;
 }
 
 start().catch((err) => {
