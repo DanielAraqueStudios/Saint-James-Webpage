@@ -14,6 +14,12 @@ type ServiceData = {
 
 type ServiceValue = ServiceData[keyof ServiceData];
 
+const PRODUCER_WHATSAPP: Record<string, string> = {
+  Santi: "573159461469",
+  Ethan: "14062005117",
+  Trace: "13072504417",
+};
+
 export default function Services() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<ServiceData>({
@@ -37,6 +43,8 @@ export default function Services() {
       }
     });
   };
+
+  const whatsappNumber = PRODUCER_WHATSAPP[data.producer] || PRODUCER_WHATSAPP.Santi;
 
   const generateLeadMessage = () => {
     return `Hello Saints Productions! I would like to start a project with the following details:%0A
@@ -253,7 +261,7 @@ Please let me know the next steps to schedule our interview!`;
                     Schedule Interview
                   </a>
                   <a
-                    href={`https://wa.me/5491100000000?text=${generateLeadMessage()}`} // Update Phone Number
+                    href={`https://wa.me/${whatsappNumber}?text=${generateLeadMessage()}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-3 bg-saint-purple text-saint-white py-5 px-6 rounded-xl font-bold uppercase tracking-widest hover:bg-saint-purple/80 transition-colors"
