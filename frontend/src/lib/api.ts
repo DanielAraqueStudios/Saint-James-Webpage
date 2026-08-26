@@ -7,6 +7,8 @@ export type Producer = {
   role: string;
   image_url: string;
   bio: string[];
+  whatsapp_number: string | null;
+  calendar_url: string | null;
 };
 
 export type Track = {

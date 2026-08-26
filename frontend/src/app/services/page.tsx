@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Footer } from "@/components/Footer";
+import { getProducers, Producer } from "@/lib/api";
 import { Film, Gamepad2, Music, CheckCircle2, ArrowRight, ArrowLeft, Calendar, Send } from "lucide-react";
 
 type ServiceData = {
@@ -14,24 +15,19 @@ type ServiceData = {
 
 type ServiceValue = ServiceData[keyof ServiceData];
 
-const PRODUCER_WHATSAPP: Record<string, string> = {
-  Santi: "573159461469",
-  Ethan: "14062005117",
-  Trace: "13072504417",
-};
-
-const PRODUCER_CALENDAR: Record<string, string> = {
-  Santi: "https://calendar.app.google/2QahZY23jDCMHPjZ6",
-};
-
 export default function Services() {
   const [step, setStep] = useState(1);
+  const [producers, setProducers] = useState<Producer[]>([]);
   const [data, setData] = useState<ServiceData>({
     type: "",
     size: "",
     services: [],
     producer: "",
   });
+
+  useEffect(() => {
+    getProducers().then(setProducers).catch(() => setProducers([]));
+  }, []);
 
   const updateData = (key: keyof ServiceData, value: ServiceValue) => {
     setData((prev) => ({ ...prev, [key]: value }));
@@ -48,8 +44,12 @@ export default function Services() {
     });
   };
 
-  const whatsappNumber = PRODUCER_WHATSAPP[data.producer] || PRODUCER_WHATSAPP.Santi;
-  const calendarLink = PRODUCER_CALENDAR[data.producer] || PRODUCER_CALENDAR.Santi;
+  // The roster (and each producer's WhatsApp/calendar link) is fully
+  // admin-managed — adding or removing a producer there is reflected here
+  // automatically, no code change needed.
+  const selectedProducer = producers.find((p) => p.name === data.producer);
+  const whatsappNumber = selectedProducer?.whatsapp_number || "";
+  const calendarLink = selectedProducer?.calendar_url || "";
 
   const generateLeadMessage = () => {
     return `Hello Saints Productions! I would like to start a project with the following details:%0A
@@ -198,24 +198,25 @@ Please let me know the next steps to schedule our interview!`;
               >
                 <h2 className="text-3xl font-bold uppercase tracking-widest mb-4">4. Select Producer</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
-                    { id: "Santi", label: "Santi", role: "Head Producer" },
-                    { id: "Trace", label: "Trace", role: "Producer & Engineer" },
-                    { id: "Ethan", label: "Ethan", role: "Producer & Composer" },
-                  ].map((prod) => (
+                  {producers.map((prod) => (
                     <button
-                      key={prod.id}
-                      onClick={() => updateData("producer", prod.label)}
+                      key={prod.slug}
+                      onClick={() => updateData("producer", prod.name)}
                       className={`p-8 rounded-3xl border text-center transition-all duration-300 flex flex-col items-center gap-2
-                        ${data.producer === prod.label 
-                          ? "border-saint-purple bg-saint-purple/10" 
+                        ${data.producer === prod.name
+                          ? "border-saint-purple bg-saint-purple/10"
                           : "border-saint-charcoal bg-saint-dark-blue/30 hover:border-saint-gray"}
                       `}
                     >
-                      <div className="w-20 h-20 rounded-full bg-saint-navy flex items-center justify-center mb-2">
-                        <span className="text-2xl font-bold text-saint-light-blue">{prod.id[0]}</span>
+                      <div className="w-20 h-20 rounded-full bg-saint-navy flex items-center justify-center mb-2 overflow-hidden">
+                        {prod.image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={prod.image_url} alt={prod.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xl font-bold text-saint-light-blue">{prod.name[0]}</span>
+                        )}
                       </div>
-                      <h3 className="text-2xl font-bold tracking-wider">{prod.label}</h3>
+                      <h3 className="text-2xl font-bold tracking-wider">{prod.name}</h3>
                       <p className="text-sm text-saint-gray uppercase">{prod.role}</p>
                     </button>
                   ))}
@@ -256,24 +257,33 @@ Please let me know the next steps to schedule our interview!`;
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                  <a
-                    href={calendarLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-3 bg-saint-white text-saint-vivid-black py-5 px-6 rounded-xl font-bold uppercase tracking-widest hover:bg-saint-light transition-colors"
-                  >
-                    <Calendar size={20} />
-                    Schedule Interview
-                  </a>
-                  <a
-                    href={`https://wa.me/${whatsappNumber}?text=${generateLeadMessage()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-3 bg-saint-purple text-saint-white py-5 px-6 rounded-xl font-bold uppercase tracking-widest hover:bg-saint-purple/80 transition-colors"
-                  >
-                    <Send size={20} />
-                    Send Request
-                  </a>
+                  {calendarLink && (
+                    <a
+                      href={calendarLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-3 bg-saint-white text-saint-vivid-black py-5 px-6 rounded-xl font-bold uppercase tracking-widest hover:bg-saint-light transition-colors"
+                    >
+                      <Calendar size={20} />
+                      Schedule Interview
+                    </a>
+                  )}
+                  {whatsappNumber && (
+                    <a
+                      href={`https://wa.me/${whatsappNumber}?text=${generateLeadMessage()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-3 bg-saint-purple text-saint-white py-5 px-6 rounded-xl font-bold uppercase tracking-widest hover:bg-saint-purple/80 transition-colors"
+                    >
+                      <Send size={20} />
+                      Send Request
+                    </a>
+                  )}
+                  {!calendarLink && !whatsappNumber && (
+                    <p className="flex-1 text-center text-saint-gray py-5">
+                      This producer hasn&apos;t set up a contact link yet — please try another producer.
+                    </p>
+                  )}
                 </div>
               </motion.div>
             )}
