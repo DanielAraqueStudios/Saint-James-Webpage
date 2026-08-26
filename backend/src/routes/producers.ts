@@ -38,6 +38,28 @@ const upload = multer({
 
 const PRODUCER_COLUMNS = "slug, name, full_name, role, image_url, bio, whatsapp_number, calendar_url";
 
+// Defense in depth against the client sending something like a pasted title
+// plus link ("Santi's Calendar https://…") as calendar_url: pull out just
+// the URL. Returns `undefined` (field omitted), `null` (explicitly cleared),
+// or `{ error }` when given text that isn't/doesn't contain an absolute
+// http(s) link, so a bad value can never silently become a broken relative
+// path — the request is rejected instead.
+function normalizeUrl(value: string | null | undefined): string | null | { error: string } | undefined {
+  if (value === undefined) return undefined;
+  if (!value || !value.trim()) return null;
+  const match = value.match(/https?:\/\/\S+/i);
+  const candidate = (match ? match[0] : value).trim();
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return { error: "calendar_url must be an http:// or https:// link" };
+    }
+    return candidate;
+  } catch {
+    return { error: "calendar_url must be a valid http:// or https:// link" };
+  }
+}
+
 router.get("/", async (_req: Request, res: Response) => {
   const result = await pool.query(
     `SELECT ${PRODUCER_COLUMNS} FROM producers ORDER BY slug`
@@ -76,6 +98,12 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
 
   const safeSlug = slug.trim().toLowerCase();
 
+  const normalizedCalendar = normalizeUrl(calendar_url);
+  if (normalizedCalendar && typeof normalizedCalendar === "object") {
+    res.status(400).json({ error: normalizedCalendar.error });
+    return;
+  }
+
   try {
     const result = await pool.query(
       `INSERT INTO producers (slug, name, full_name, role, image_url, bio, whatsapp_number, calendar_url)
@@ -89,7 +117,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
         image_url || "",
         bio && bio.length > 0 ? bio : [],
         whatsapp_number || null,
-        calendar_url || null,
+        normalizedCalendar || null,
       ]
     );
     res.status(201).json(result.rows[0]);
@@ -118,7 +146,13 @@ router.put("/:slug", requireAuth, async (req: AuthRequest, res: Response) => {
   const whatsappProvided = "whatsapp_number" in req.body;
   const calendarProvided = "calendar_url" in req.body;
   const normalizedWhatsapp = whatsapp_number && whatsapp_number.trim() ? whatsapp_number.trim() : null;
-  const normalizedCalendar = calendar_url && calendar_url.trim() ? calendar_url.trim() : null;
+
+  const normalizedCalendarResult = normalizeUrl(calendar_url);
+  if (normalizedCalendarResult && typeof normalizedCalendarResult === "object") {
+    res.status(400).json({ error: normalizedCalendarResult.error });
+    return;
+  }
+  const normalizedCalendar = normalizedCalendarResult ?? null;
 
   const result = await pool.query(
     `UPDATE producers
