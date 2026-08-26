@@ -1,0 +1,1 @@
+ALTER TABLE tracks ALTER COLUMN category DROP NOT NULL;

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { api, Producer } from "@/lib/api";
 
 const NEW_CATEGORY = "__new__";
+const NO_CATEGORY = "";
 
 export default function UploadTrackPage() {
   const [producers, setProducers] = useState<Producer[]>([]);
@@ -26,16 +27,18 @@ export default function UploadTrackPage() {
       if (p.length > 0) setProducerSlug(p[0].slug);
     });
     api.getCategories().then((cats) => {
-      const names = cats.map((c) => c.name);
-      setCategories(names);
-      setCategorySelect(names.length > 0 ? names[0] : NEW_CATEGORY);
+      setCategories(cats.map((c) => c.name));
+      setCategorySelect(NO_CATEGORY);
     });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) { setError("Please select a file"); return; }
-    if (!category.trim()) { setError("Please choose or create a category"); return; }
+    if (categorySelect === NEW_CATEGORY && !newCategory.trim()) {
+      setError("Please enter a name for the new category");
+      return;
+    }
     setError("");
     setMsg("");
     setUploading(true);
@@ -100,12 +103,13 @@ export default function UploadTrackPage() {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-400 mb-1">Category</label>
+          <label className="block text-sm text-gray-400 mb-1">Category (genre)</label>
           <select
             value={categorySelect}
             onChange={(e) => setCategorySelect(e.target.value)}
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
           >
+            <option value={NO_CATEGORY}>No category (Other)</option>
             {categories.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}

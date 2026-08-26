@@ -7,7 +7,10 @@ export default function TracksPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editData, setEditData] = useState({ title: "", category: "" });
+  const [editData, setEditData] = useState<{ title: string; category: string | null }>({
+    title: "",
+    category: "",
+  });
   const [msg, setMsg] = useState("");
   const [filterProducer, setFilterProducer] = useState("");
 
@@ -20,10 +23,13 @@ export default function TracksPage() {
   const visible = filterProducer ? tracks.filter((t) => t.producer_slug === filterProducer) : tracks;
 
   const grouped = visible.reduce<Record<string, Track[]>>((acc, t) => {
-    (acc[t.category] ??= []).push(t);
+    const key = t.category || "Other";
+    (acc[key] ??= []).push(t);
     return acc;
   }, {});
-  const sortedCategories = Object.keys(grouped).sort();
+  const sortedCategories = Object.keys(grouped).sort((a, b) =>
+    a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b)
+  );
 
   async function handleDelete(id: number) {
     if (!confirm("Delete this track?")) return;
@@ -73,10 +79,11 @@ export default function TracksPage() {
                         className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm flex-1"
                       />
                       <select
-                        value={editData.category}
-                        onChange={(e) => setEditData({ ...editData, category: e.target.value })}
+                        value={editData.category ?? ""}
+                        onChange={(e) => setEditData({ ...editData, category: e.target.value || null })}
                         className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm w-36"
                       >
+                        <option value="">No category (Other)</option>
                         {categories.map((c) => (
                           <option key={c} value={c}>{c}</option>
                         ))}

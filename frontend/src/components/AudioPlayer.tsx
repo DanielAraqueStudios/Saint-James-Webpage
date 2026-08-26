@@ -71,7 +71,7 @@ export function AudioPlayer({ track, producerName }: Props) {
           <p className="font-semibold text-sm truncate">{track.title}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <span className="text-xs bg-saint-purple/30 text-saint-light-blue px-2 py-0.5 rounded-full">
-              {track.category}
+              {track.category || "Other"}
             </span>
             {producerName && (
               <span className="text-xs text-saint-gray">{producerName}</span>

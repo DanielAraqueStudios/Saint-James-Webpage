@@ -13,7 +13,7 @@ export type Track = {
   id: number;
   producer_slug: string;
   title: string;
-  category: string;
+  category: string | null;
   filename: string;
   format: "wav" | "mp3";
   created_at: string;
@@ -36,6 +36,17 @@ export async function getTracks(params?: { producer?: string; category?: string 
   const qs = params ? new URLSearchParams(params as Record<string, string>).toString() : "";
   const res = await fetch(`${BASE}/api/tracks${qs ? `?${qs}` : ""}`, { next: { revalidate: 30 } });
   if (!res.ok) throw new Error("Failed to fetch tracks");
+  return res.json();
+}
+
+export type Category = {
+  name: string;
+  track_count: number;
+};
+
+export async function getCategories(): Promise<Category[]> {
+  const res = await fetch(`${BASE}/api/categories`, { next: { revalidate: 60 } });
+  if (!res.ok) throw new Error("Failed to fetch categories");
   return res.json();
 }
 

@@ -44,7 +44,9 @@ router.get("/", async (req: Request, res: Response) => {
     params.push(producer);
     conditions.push(`producer_slug = $${params.length}`);
   }
-  if (category) {
+  if (category === "Other") {
+    conditions.push(`category IS NULL`);
+  } else if (category) {
     params.push(category);
     conditions.push(`category = $${params.length}`);
   }
@@ -78,33 +80,40 @@ router.post("/", requireAuth, (req: AuthRequest, res: Response, next) => {
     producer_slug?: string;
   };
 
-  if (!title || !category || !producer_slug || !req.file) {
-    res.status(400).json({ error: "title, category, producer_slug and file are required" });
+  if (!title || !producer_slug || !req.file) {
+    res.status(400).json({ error: "title, producer_slug and file are required" });
     return;
   }
 
   const ext = path.extname(req.file.originalname).toLowerCase().slice(1) as "wav" | "mp3";
   const filename = `${producer_slug}/${req.file.filename}`;
+  const normalizedCategory = category && category.trim() ? category.trim() : null;
 
   const result = await pool.query(
     `INSERT INTO tracks (producer_slug, title, category, filename, format)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [producer_slug, title, category, filename, ext]
+    [producer_slug, title, normalizedCategory, filename, ext]
   );
   res.status(201).json(result.rows[0]);
 });
 
 router.put("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
-  const { title, category } = req.body as { title?: string; category?: string };
+  const { title, category } = req.body as { title?: string; category?: string | null };
+
+  // `category` is nullable: an explicit "" or "Other" from the admin means
+  // "clear the category", so it must be distinguished from "field omitted".
+  const categoryProvided = "category" in req.body;
+  const normalizedCategory =
+    category && category.trim() && category.trim() !== "Other" ? category.trim() : null;
 
   const result = await pool.query(
     `UPDATE tracks
      SET title = COALESCE($1, title),
-         category = COALESCE($2, category)
-     WHERE id = $3
+         category = CASE WHEN $2 THEN $3 ELSE category END
+     WHERE id = $4
      RETURNING *`,
-    [title, category, req.params.id]
+    [title, categoryProvided, normalizedCategory, req.params.id]
   );
 
   if (result.rows.length === 0) {

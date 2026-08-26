@@ -64,7 +64,7 @@ export const api = {
   },
   uploadTrack: (form: FormData) =>
     request<Track>("/api/tracks", { method: "POST", body: form }),
-  updateTrack: (id: number, data: { title?: string; category?: string }) =>
+  updateTrack: (id: number, data: { title?: string; category?: string | null }) =>
     request<Track>(`/api/tracks/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteTrack: (id: number) =>
     request<{ deleted: boolean }>(`/api/tracks/${id}`, { method: "DELETE" }),
@@ -103,7 +103,7 @@ export type Track = {
   id: number;
   producer_slug: string;
   title: string;
-  category: string;
+  category: string | null;
   filename: string;
   format: "wav" | "mp3";
   created_at: string;
