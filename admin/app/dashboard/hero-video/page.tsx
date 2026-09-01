@@ -11,11 +11,33 @@ export default function HeroVideoPage() {
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
+  const [savingSound, setSavingSound] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     api.getHeroVideo().then(setVideo);
   }, []);
+
+  // Browsers block autoplay-with-sound outright, no matter what's set here —
+  // the site always starts muted and shows visitors an unmute control. What
+  // this controls is what happens once a visitor unmutes: silence, or sound
+  // at this volume.
+  async function handleSoundChange(next: { muted?: boolean; volume?: number }) {
+    if (!video) return;
+    const previous = video;
+    setVideo({ ...video, ...next });
+    setSavingSound(true);
+    setError("");
+    try {
+      const updated = await api.updateHeroVideoSound(next);
+      setVideo(updated);
+    } catch (err) {
+      setVideo(previous);
+      setError(err instanceof Error ? err.message : "Failed to update sound settings");
+    } finally {
+      setSavingSound(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,6 +94,43 @@ export default function HeroVideoPage() {
           <p className="text-gray-500 text-sm">No video set.</p>
         )}
       </div>
+
+      {video && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6 space-y-4">
+          <p className="text-sm text-gray-400">Sound</p>
+          <p className="text-xs text-gray-600 -mt-2">
+            Browsers always start the video muted for autoplay — visitors see an unmute
+            button on the site. This sets what plays once they unmute it.
+          </p>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={video.muted}
+              onChange={(e) => handleSoundChange({ muted: e.target.checked })}
+              disabled={savingSound}
+              className="w-4 h-4"
+            />
+            No sound (video stays silent even after visitors unmute)
+          </label>
+
+          <div className={video.muted ? "opacity-50" : undefined}>
+            <label className="block text-xs text-gray-500 mb-1">
+              Volume ({Math.round(video.volume * 100)}%)
+            </label>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={video.volume}
+              onChange={(e) => handleSoundChange({ volume: Number(e.target.value) })}
+              disabled={savingSound || video.muted}
+              className="w-full"
+            />
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
         <div>

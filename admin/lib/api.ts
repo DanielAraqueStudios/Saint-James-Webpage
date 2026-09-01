@@ -99,6 +99,8 @@ export const api = {
   getHeroVideo: () => request<HeroVideo | null>("/api/hero-video"),
   uploadHeroVideo: (form: FormData) =>
     request<HeroVideo>("/api/hero-video", { method: "POST", body: form }),
+  updateHeroVideoSound: (settings: { muted?: boolean; volume?: number }) =>
+    request<HeroVideo>("/api/hero-video", { method: "PATCH", body: JSON.stringify(settings) }),
 };
 
 export type Producer = {
@@ -130,5 +132,7 @@ export type Track = {
 export type HeroVideo = {
   video_url: string;
   format: string;
+  muted: boolean;
+  volume: number;
   updated_at: string;
 };

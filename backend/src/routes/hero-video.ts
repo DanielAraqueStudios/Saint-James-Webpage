@@ -34,8 +34,40 @@ const upload = multer({
 });
 
 router.get("/", async (_req: Request, res: Response) => {
-  const result = await pool.query("SELECT video_url, format, updated_at FROM hero_video WHERE id = 1");
+  const result = await pool.query(
+    "SELECT video_url, format, muted, volume, updated_at FROM hero_video WHERE id = 1"
+  );
   res.json(result.rows[0] || null);
+});
+
+// Sound settings only — kept separate from the multipart upload route below
+// so the admin can adjust mute/volume without re-uploading the file.
+router.patch("/", requireAuth, async (req: AuthRequest, res: Response) => {
+  const { muted, volume } = req.body as { muted?: boolean; volume?: number };
+
+  if (muted === undefined && volume === undefined) {
+    res.status(400).json({ error: "muted and/or volume is required" });
+    return;
+  }
+  if (volume !== undefined && (typeof volume !== "number" || volume < 0 || volume > 1)) {
+    res.status(400).json({ error: "volume must be a number between 0 and 1" });
+    return;
+  }
+
+  const result = await pool.query(
+    `UPDATE hero_video
+     SET muted = COALESCE($1, muted),
+         volume = COALESCE($2, volume)
+     WHERE id = 1
+     RETURNING video_url, format, muted, volume, updated_at`,
+    [muted ?? null, volume ?? null]
+  );
+
+  if (result.rows.length === 0) {
+    res.status(404).json({ error: "No hero video set" });
+    return;
+  }
+  res.json(result.rows[0]);
 });
 
 router.post("/", requireAuth, (req: AuthRequest, res: Response, next) => {
