@@ -13,6 +13,13 @@ import heroVideoRouter from "./routes/hero-video";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Railway (and most PaaS hosts) terminate TLS at an edge proxy and forward
+// plain HTTP to this container. Without trusting that proxy, req.protocol
+// reports "http" even on an https:// request, so URLs built from it
+// (image_url, track/hero-video URLs) end up http:// and get blocked as
+// mixed content on the https frontend.
+app.set("trust proxy", 1);
+
 app.use(cors());
 app.use(express.json());
 

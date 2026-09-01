@@ -55,15 +55,26 @@ const producers = [
 ];
 
 export async function runSeed() {
-  for (const p of producers) {
-    await pool.query(
-      `INSERT INTO producers (slug, name, full_name, role, image_url, bio, whatsapp_number, calendar_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       ON CONFLICT (slug) DO NOTHING`,
-      [p.slug, p.name, p.full_name, p.role, p.image_url, p.bio, p.whatsapp_number, p.calendar_url]
-    );
+  // This runs on every boot (see index.ts), not just the first one. Seeding
+  // per-row with ON CONFLICT DO NOTHING meant a producer deleted through the
+  // admin panel would get silently re-inserted from this hardcoded list on
+  // the next redeploy, since there was no longer a row to conflict with.
+  // Only bootstrap these defaults when the table is genuinely empty (a
+  // fresh database) so deletions made afterward stick.
+  const { rows } = await pool.query("SELECT COUNT(*) FROM producers");
+  if (Number(rows[0].count) === 0) {
+    for (const p of producers) {
+      await pool.query(
+        `INSERT INTO producers (slug, name, full_name, role, image_url, bio, whatsapp_number, calendar_url)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (slug) DO NOTHING`,
+        [p.slug, p.name, p.full_name, p.role, p.image_url, p.bio, p.whatsapp_number, p.calendar_url]
+      );
+    }
+    console.log("Producers seeded.");
+  } else {
+    console.log("Producers table already populated, skipping default seed.");
   }
-  console.log("Producers seeded.");
 
   const username = process.env.ADMIN_USERNAME || "admin";
   const password = process.env.ADMIN_PASSWORD || "changeme";
