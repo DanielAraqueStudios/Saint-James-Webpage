@@ -12,10 +12,17 @@ export default function HeroVideoPage() {
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const [savingSound, setSavingSound] = useState(false);
+  // Dragging the slider updates this local value only — no network call per
+  // tick, which is what made it feel laggy. It's only sent to the API when
+  // the admin clicks "Update Volume".
+  const [pendingVolume, setPendingVolume] = useState(1);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.getHeroVideo().then(setVideo);
+    api.getHeroVideo().then((v) => {
+      setVideo(v);
+      if (v) setPendingVolume(v.volume);
+    });
   }, []);
 
   // Browsers block autoplay-with-sound outright, no matter what's set here —
@@ -116,18 +123,26 @@ export default function HeroVideoPage() {
 
           <div className={video.muted ? "opacity-50" : undefined}>
             <label className="block text-xs text-gray-500 mb-1">
-              Volume ({Math.round(video.volume * 100)}%)
+              Volume ({Math.round(pendingVolume * 100)}%)
             </label>
             <input
               type="range"
               min={0}
               max={1}
               step={0.05}
-              value={video.volume}
-              onChange={(e) => handleSoundChange({ volume: Number(e.target.value) })}
+              value={pendingVolume}
+              onChange={(e) => setPendingVolume(Number(e.target.value))}
               disabled={savingSound || video.muted}
               className="w-full"
             />
+            <button
+              type="button"
+              onClick={() => handleSoundChange({ volume: pendingVolume })}
+              disabled={savingSound || video.muted || pendingVolume === video.volume}
+              className="mt-2 w-full bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded-lg py-1.5 text-sm font-medium transition-colors"
+            >
+              {savingSound ? "Updating…" : "Update Volume"}
+            </button>
           </div>
         </div>
       )}
