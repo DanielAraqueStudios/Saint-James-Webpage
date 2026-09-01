@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { api, HeroVideo } from "@/lib/api";
+import { ProgressBar } from "@/components/ProgressBar";
 
 const MAX_SIZE_MB = 300;
 
@@ -9,6 +10,7 @@ export default function HeroVideoPage() {
   const [video, setVideo] = useState<HeroVideo | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const [savingSound, setSavingSound] = useState(false);
@@ -56,11 +58,12 @@ export default function HeroVideoPage() {
     setError("");
     setMsg("");
     setUploading(true);
+    setProgress(0);
 
     try {
       const form = new FormData();
       form.append("file", file);
-      const updated = await api.uploadHeroVideo(form);
+      const updated = await api.uploadHeroVideo(form, setProgress);
       setVideo(updated);
       setMsg("Home page video updated successfully!");
       setFile(null);
@@ -69,6 +72,7 @@ export default function HeroVideoPage() {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
+      setProgress(0);
     }
   }
 
@@ -161,12 +165,19 @@ export default function HeroVideoPage() {
           {file && <p className="text-xs text-gray-500 mt-1">{file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)</p>}
         </div>
 
+        {uploading && (
+          <div>
+            <ProgressBar percent={progress} />
+            <p className="text-xs text-gray-500 mt-1">{progress}%</p>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={uploading}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg py-2 font-medium transition-colors"
         >
-          {uploading ? "Uploading…" : "Replace Video"}
+          {uploading ? `Uploading… ${progress}%` : "Replace Video"}
         </button>
       </form>
     </div>

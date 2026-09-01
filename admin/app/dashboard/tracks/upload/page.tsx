@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { api, Producer } from "@/lib/api";
+import { ProgressBar } from "@/components/ProgressBar";
 
 const NEW_CATEGORY = "__new__";
 const NO_CATEGORY = "";
@@ -16,6 +17,7 @@ export default function UploadTrackPage() {
   const [newCategory, setNewCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -47,6 +49,7 @@ export default function UploadTrackPage() {
     setError("");
     setMsg("");
     setUploading(true);
+    setProgress(0);
 
     try {
       if (categorySelect === NEW_CATEGORY && !categories.includes(category)) {
@@ -59,7 +62,7 @@ export default function UploadTrackPage() {
       form.append("title", title);
       form.append("category", category);
       form.append("producer_slug", producerSlug);
-      await api.uploadTrack(form);
+      await api.uploadTrack(form, setProgress);
 
       setMsg("Track uploaded successfully!");
       setTitle("");
@@ -71,6 +74,7 @@ export default function UploadTrackPage() {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
+      setProgress(0);
     }
   }
 
@@ -145,12 +149,19 @@ export default function UploadTrackPage() {
           {file && <p className="text-xs text-gray-500 mt-1">{file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)</p>}
         </div>
 
+        {uploading && (
+          <div>
+            <ProgressBar percent={progress} />
+            <p className="text-xs text-gray-500 mt-1">{progress}%</p>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={uploading}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg py-2 font-medium transition-colors"
         >
-          {uploading ? "Uploading…" : "Upload Track"}
+          {uploading ? `Uploading… ${progress}%` : "Upload Track"}
         </button>
       </form>
     </div>

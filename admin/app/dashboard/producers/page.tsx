@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api, Producer } from "@/lib/api";
 import { PhoneNumberInput, isValidStoredNumber } from "@/components/PhoneNumberInput";
 import { UrlInput, isValidUrl } from "@/components/UrlInput";
+import { ProgressBar } from "@/components/ProgressBar";
 
 const EMPTY_NEW = {
   slug: "",
@@ -21,6 +22,7 @@ export default function ProducersPage() {
   const [newProducer, setNewProducer] = useState(EMPTY_NEW);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -33,11 +35,12 @@ export default function ProducersPage() {
     if (!file) return;
 
     setUploading(true);
+    setUploadProgress(0);
     setMsg("");
     try {
       const form = new FormData();
       form.append("image", file);
-      const updated = await api.uploadProducerImage(editing.slug, form);
+      const updated = await api.uploadProducerImage(editing.slug, form, setUploadProgress);
       setEditing({ ...editing, image_url: updated.image_url });
       setProducers((prev) => prev.map((p) => (p.slug === updated.slug ? updated : p)));
       setMsg("Image uploaded.");
@@ -45,6 +48,7 @@ export default function ProducersPage() {
       setMsg(err instanceof Error ? err.message : "Image upload failed");
     } finally {
       setUploading(false);
+      setUploadProgress(0);
       e.target.value = "";
     }
   }
@@ -205,7 +209,7 @@ export default function ProducersPage() {
                   />
                 )}
                 <label className="cursor-pointer text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors">
-                  {uploading ? "Uploading…" : "Upload image"}
+                  {uploading ? `Uploading… ${uploadProgress}%` : "Upload image"}
                   <input
                     type="file"
                     accept="image/*,.avif,.svg,.bmp,.tiff,.tif"
@@ -215,6 +219,11 @@ export default function ProducersPage() {
                   />
                 </label>
               </div>
+              {uploading && (
+                <div className="mt-2 max-w-xs">
+                  <ProgressBar percent={uploadProgress} />
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-1">Supports JPG, PNG, WebP, GIF, AVIF, SVG, BMP and TIFF.</p>
             </div>
             <div>
