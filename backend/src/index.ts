@@ -5,7 +5,6 @@ import path from "path";
 import fs from "fs";
 import { runMigrations } from "./db/migrate";
 import { runSeed } from "./db/seed";
-import { pool } from "./db/client";
 import authRouter from "./routes/auth";
 import producersRouter from "./routes/producers";
 import tracksRouter from "./routes/tracks";
@@ -34,56 +33,6 @@ app.use("/api/categories", categoriesRouter);
 app.use("/api/hero-video", heroVideoRouter);
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
-
-// TEMP DIAGNOSTIC — remove once the uploads-volume persistence issue is
-// confirmed fixed. Lists what's actually on disk under uploads/<dir>.
-app.get("/api/debug/uploads", (req, res) => {
-  const sub = typeof req.query.dir === "string" ? req.query.dir : "";
-  const target = path.join(process.cwd(), "uploads", sub);
-  const root = path.join(process.cwd(), "uploads");
-  if (!target.startsWith(root)) {
-    res.status(400).json({ error: "invalid dir" });
-    return;
-  }
-  try {
-    const entries = fs.readdirSync(target, { withFileTypes: true }).map((e) => {
-      if (e.isDirectory()) return { name: e.name, type: "dir" };
-      const stat = fs.statSync(path.join(target, e.name));
-      return { name: e.name, type: "file", size: stat.size, mtime: stat.mtime };
-    });
-    res.json({ target, entries });
-  } catch (err) {
-    res.status(500).json({ target, error: err instanceof Error ? err.message : String(err) });
-  }
-});
-
-// TEMP ONE-OFF REPAIR — moves track files that landed in uploads/unknown
-// (from the field-ordering bug above, fixed now) to the directory their DB
-// row's filename already expects. Remove alongside the debug route once run.
-app.post("/api/debug/uploads/repair", async (_req, res) => {
-  const root = path.join(process.cwd(), "uploads");
-  const result = await pool.query("SELECT id, filename FROM tracks");
-  const moved: { id: number; from: string; to: string }[] = [];
-  const skipped: { id: number; reason: string }[] = [];
-
-  for (const row of result.rows as { id: number; filename: string }[]) {
-    const target = path.join(root, row.filename);
-    if (fs.existsSync(target)) {
-      skipped.push({ id: row.id, reason: "already at expected path" });
-      continue;
-    }
-    const candidate = path.join(root, "unknown", path.basename(row.filename));
-    if (!fs.existsSync(candidate)) {
-      skipped.push({ id: row.id, reason: "not found in uploads/unknown either" });
-      continue;
-    }
-    fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.renameSync(candidate, target);
-    moved.push({ id: row.id, from: candidate, to: target });
-  }
-
-  res.json({ moved, skipped });
-});
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error("Unhandled error:", err);
