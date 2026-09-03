@@ -41,7 +41,7 @@ export default async function Sounds() {
       </div>
 
       <div className="mt-20">
-        <Footer />
+        <Footer showLicenseNotice />
       </div>
     </div>
   );

@@ -2,7 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
-export function Footer() {
+type Props = {
+  /** Shows the music licensing/copyright notice in the middle column — only on pages that feature tracks (About, Sounds). */
+  showLicenseNotice?: boolean;
+};
+
+export function Footer({ showLicenseNotice = false }: Props = {}) {
   const socials = [
     { name: "Instagram", href: "https://www.instagram.com/saintsproductions.music?igsh=MXZ4bWpubzgwejI2ZA%3D%3D&utm_source=qr" },
     { name: "YouTube", href: "https://youtube.com/@saintsproductions-music?si=uEku2rWkQkzB-shv" },
@@ -39,6 +44,26 @@ export function Footer() {
             </div>
           </div>
         </div>
+
+        {/* License notice — only passed in on pages that feature tracks */}
+        {showLicenseNotice && (
+          <div className="max-w-md text-xs text-neutral-600 leading-relaxed space-y-3">
+            <p>
+              All music, audio, and sound content featured on this website is provided for
+              demonstration and portfolio purposes only. These tracks are excerpts of original
+              work by Saints Productions and are protected under copyright law. No part of this
+              content may be downloaded, copied, distributed, synced, broadcast, or used in any
+              commercial or non-commercial project without prior written authorization.
+            </p>
+            <p>
+              For licensing inquiries, custom scoring, or collaboration opportunities, please{" "}
+              <Link href="/contact" className="text-neutral-400 hover:text-white transition-colors underline underline-offset-2">
+                contact us
+              </Link>
+              .
+            </p>
+          </div>
+        )}
 
         {/* Links Right */}
         <div className="flex flex-col sm:flex-row gap-12 md:gap-24 w-full md:w-auto">

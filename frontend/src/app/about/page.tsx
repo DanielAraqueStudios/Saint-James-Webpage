@@ -97,7 +97,7 @@ export default async function About() {
       </div>
 
       <div className="mt-20">
-        <Footer />
+        <Footer showLicenseNotice />
       </div>
     </div>
   );
