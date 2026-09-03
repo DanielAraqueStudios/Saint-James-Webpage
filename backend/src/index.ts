@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import { runMigrations } from "./db/migrate";
 import { runSeed } from "./db/seed";
 import authRouter from "./routes/auth";
@@ -32,6 +33,28 @@ app.use("/api/categories", categoriesRouter);
 app.use("/api/hero-video", heroVideoRouter);
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
+
+// TEMP DIAGNOSTIC — remove once the uploads-volume persistence issue is
+// confirmed fixed. Lists what's actually on disk under uploads/<dir>.
+app.get("/api/debug/uploads", (req, res) => {
+  const sub = typeof req.query.dir === "string" ? req.query.dir : "";
+  const target = path.join(process.cwd(), "uploads", sub);
+  const root = path.join(process.cwd(), "uploads");
+  if (!target.startsWith(root)) {
+    res.status(400).json({ error: "invalid dir" });
+    return;
+  }
+  try {
+    const entries = fs.readdirSync(target, { withFileTypes: true }).map((e) => {
+      if (e.isDirectory()) return { name: e.name, type: "dir" };
+      const stat = fs.statSync(path.join(target, e.name));
+      return { name: e.name, type: "file", size: stat.size, mtime: stat.mtime };
+    });
+    res.json({ target, entries });
+  } catch (err) {
+    res.status(500).json({ target, error: err instanceof Error ? err.message : String(err) });
+  }
+});
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error("Unhandled error:", err);

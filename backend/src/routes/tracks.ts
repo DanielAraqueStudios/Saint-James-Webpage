@@ -2,10 +2,46 @@ import { Router, Request, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { execFile } from "child_process";
 import { pool } from "../db/client";
 import { requireAuth, AuthRequest } from "../middleware/auth";
 
 const router = Router();
+
+// Trims an audio file in place using ffmpeg: re-encodes [start, end] (seconds)
+// to a temp file, then swaps it in over the original path. Re-encoding (not
+// stream copy) keeps the cut sample-accurate regardless of keyframe spacing.
+function trimAudioFile(filePath: string, start: number, end: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const ext = path.extname(filePath); // includes the dot, e.g. ".mp3"
+    const codec = ext === ".mp3" ? "libmp3lame" : "pcm_s16le";
+    const tempPath = `${filePath}.trim${ext}`;
+
+    execFile(
+      "ffmpeg",
+      [
+        "-y",
+        "-i", filePath,
+        "-ss", start.toString(),
+        "-to", end.toString(),
+        "-c:a", codec,
+        ...(ext === ".mp3" ? ["-q:a", "2"] : []),
+        tempPath,
+      ],
+      (err) => {
+        if (err) {
+          fs.rm(tempPath, { force: true }, () => {});
+          reject(err);
+          return;
+        }
+        fs.rename(tempPath, filePath, (renameErr) => {
+          if (renameErr) reject(renameErr);
+          else resolve();
+        });
+      }
+    );
+  });
+}
 
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
@@ -80,15 +116,37 @@ router.post("/", requireAuth, (req: AuthRequest, res: Response, next) => {
     next();
   });
 }, async (req: AuthRequest, res: Response) => {
-  const { title, category, producer_slug } = req.body as {
+  const { title, category, producer_slug, trim_start, trim_end } = req.body as {
     title?: string;
     category?: string;
     producer_slug?: string;
+    trim_start?: string;
+    trim_end?: string;
   };
 
   if (!title || !producer_slug || !req.file) {
     res.status(400).json({ error: "title, producer_slug and file are required" });
     return;
+  }
+
+  const start = trim_start !== undefined ? Number(trim_start) : undefined;
+  const end = trim_end !== undefined ? Number(trim_end) : undefined;
+  const hasTrim = start !== undefined && end !== undefined && !Number.isNaN(start) && !Number.isNaN(end);
+
+  if (hasTrim && (start! < 0 || end! <= start!)) {
+    fs.unlink(req.file.path, () => {});
+    res.status(400).json({ error: "Invalid trim range" });
+    return;
+  }
+
+  if (hasTrim) {
+    try {
+      await trimAudioFile(req.file.path, start!, end!);
+    } catch {
+      fs.unlink(req.file.path, () => {});
+      res.status(400).json({ error: "Failed to trim audio — check the selected range" });
+      return;
+    }
   }
 
   const ext = path.extname(req.file.originalname).toLowerCase().slice(1) as "wav" | "mp3";

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { api, Producer, Category } from "@/lib/api";
 import { ProgressBar } from "@/components/ProgressBar";
+import { TrackTrimmer } from "@/components/TrackTrimmer";
 
 const NEW_CATEGORY = "__new__";
 const NO_CATEGORY = "";
@@ -16,6 +17,8 @@ export default function UploadTrackPage() {
   const [categorySelect, setCategorySelect] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [customize, setCustomize] = useState(false);
+  const [trim, setTrim] = useState<{ start: number; end: number } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [msg, setMsg] = useState("");
@@ -62,6 +65,10 @@ export default function UploadTrackPage() {
       form.append("title", title);
       form.append("category", category);
       form.append("producer_slug", producerSlug);
+      if (customize && trim && trim.end > trim.start) {
+        form.append("trim_start", trim.start.toString());
+        form.append("trim_end", trim.end.toString());
+      }
       await api.uploadTrack(form, setProgress);
 
       setMsg("Track uploaded successfully!");
@@ -69,6 +76,8 @@ export default function UploadTrackPage() {
       setCategorySelect(category);
       setNewCategory("");
       setFile(null);
+      setCustomize(false);
+      setTrim(null);
       if (fileRef.current) fileRef.current.value = "";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
@@ -152,12 +161,34 @@ export default function UploadTrackPage() {
             ref={fileRef}
             type="file"
             accept=".wav,.mp3"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              setFile(e.target.files?.[0] ?? null);
+              setTrim(null);
+            }}
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white file:mr-3 file:bg-gray-700 file:text-white file:border-0 file:rounded file:px-3 file:py-1 file:text-sm cursor-pointer"
             required
           />
           {file && <p className="text-xs text-gray-500 mt-1">{file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)</p>}
         </div>
+
+        {file && (
+          <div>
+            <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={customize}
+                onChange={(e) => setCustomize(e.target.checked)}
+                className="accent-blue-600"
+              />
+              Customize track (trim start/end before upload)
+            </label>
+            {customize && (
+              <div className="mt-2">
+                <TrackTrimmer file={file} onChange={(start, end) => setTrim({ start, end })} />
+              </div>
+            )}
+          </div>
+        )}
 
         {uploading && (
           <div>
