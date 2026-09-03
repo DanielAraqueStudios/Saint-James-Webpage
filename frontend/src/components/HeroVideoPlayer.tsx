@@ -88,7 +88,7 @@ export function HeroVideoPlayer({ videoUrl, mutedByDefault, volume }: Props) {
       <video
         ref={videoRef}
         key={videoUrl}
-        className="h-screen w-full object-cover"
+        className="h-dvh w-full object-cover"
         autoPlay
         loop
         muted

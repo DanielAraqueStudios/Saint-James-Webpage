@@ -37,7 +37,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-saint-matte-black">
-      <section className="relative min-h-screen w-full overflow-hidden bg-saint-vivid-black">
+      <section className="relative min-h-dvh w-full overflow-hidden bg-saint-vivid-black">
         <HeroVideoPlayer videoUrl={video_url} mutedByDefault={muted} volume={volume} />
         <div className="pointer-events-none absolute inset-0 bg-saint-vivid-black/20" />
         {/* Real heading for SEO/screen readers — kept off-screen so the hero
