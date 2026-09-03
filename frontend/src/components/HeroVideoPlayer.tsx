@@ -11,16 +11,33 @@ type Props = {
 };
 
 // The <video> below always starts with the `muted` attribute so autoplay is
-// guaranteed to work everywhere — that part isn't configurable. When the
-// admin has sound enabled (mutedByDefault === false), we immediately try to
-// flip it to unmuted + play at the configured volume. Most browsers allow
-// that once a visitor has any engagement with the site; when a browser
-// blocks it, play()/pause tells us and we fall back to staying muted with
-// the button offering to unmute — same UI either way, just whichever the
-// browser actually allowed wins.
+// guaranteed to work everywhere — that part isn't configurable, and the
+// browser's own `autoPlay` handles that initial muted playback (we never
+// call .play() ourselves for it, so there's nothing to race against it).
+// When the admin has sound enabled (mutedByDefault === false), we try to
+// upgrade to unmuted at the configured volume: if the element is already
+// playing (the common case — muted autoplay already succeeded) we just flip
+// `.muted`/`.volume` with no extra play() call, so there's no
+// interrupted-request AbortError to misread as an autoplay-policy block. We
+// only call `.play()` ourselves if the element is genuinely paused, and only
+// a rejection of *that* call counts as "browser blocked it".
+//
+// A `volumechange` listener keeps the `unmuted` UI state mirroring the real
+// `el.muted` value at all times (including after the fallback path), so the
+// button can never show a state the video isn't actually in.
 export function HeroVideoPlayer({ videoUrl, mutedByDefault, volume }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [unmuted, setUnmuted] = useState(false);
+
+  // Mirror the element's real muted state into React state, whatever caused
+  // the change (our code, or the browser).
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const syncFromEl = () => setUnmuted(!el.muted);
+    el.addEventListener("volumechange", syncFromEl);
+    return () => el.removeEventListener("volumechange", syncFromEl);
+  }, [videoUrl]);
 
   useEffect(() => {
     if (mutedByDefault) return;
@@ -28,33 +45,42 @@ export function HeroVideoPlayer({ videoUrl, mutedByDefault, volume }: Props) {
     if (!el) return;
 
     el.volume = volume;
+
+    if (!el.paused) {
+      // Muted autoplay is already running — just upgrade it in place.
+      el.muted = false;
+      return;
+    }
+
+    // Not playing yet (autoplay hasn't kicked in, or was blocked outright).
+    // This is the only play() call we make, so a rejection here is a real
+    // autoplay-policy block, not a race with the browser's own attempt.
     el.muted = false;
-    el
-      .play()
-      .then(() => {
-        if (!el.paused && !el.muted) setUnmuted(true);
-      })
-      .catch(() => {
-        // Browser blocked unmuted autoplay — stay muted, let the visitor
-        // opt in via the button.
-        el.muted = true;
-        setUnmuted(false);
-      });
+    el.play().catch(() => {
+      el.muted = true;
+    });
   }, [mutedByDefault, volume, videoUrl]);
+
+  // Re-apply the configured volume if the admin changes it after the visitor
+  // is already listening.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || el.muted) return;
+    el.volume = volume;
+  }, [volume]);
 
   function handleUnmute() {
     const el = videoRef.current;
     if (!el) return;
     el.volume = volume;
     el.muted = false;
-    setUnmuted(true);
+    if (el.paused) el.play().catch(() => {});
   }
 
   function handleMute() {
     const el = videoRef.current;
     if (!el) return;
     el.muted = true;
-    setUnmuted(false);
   }
 
   return (
