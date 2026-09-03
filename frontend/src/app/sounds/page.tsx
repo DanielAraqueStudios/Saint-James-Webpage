@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { AudioGallery } from "@/components/AudioGallery";
 import { getProducers, getTracks, getCategories } from "@/lib/api";
+
+export const metadata: Metadata = {
+  title: "Sounds",
+  description:
+    "Explore the full Saints Productions catalog — filter tracks by genre or by producer and listen directly.",
+  alternates: { canonical: "/sounds" },
+};
 
 export default async function Sounds() {
   const [producers, tracks, categories] = await Promise.all([

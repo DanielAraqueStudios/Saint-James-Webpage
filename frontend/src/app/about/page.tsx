@@ -1,8 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { getProducers } from "@/lib/api";
 import type { Producer } from "@/lib/api";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Meet the collective of sonic architects behind Saints Productions — producers, composers, and audio engineers shaping music for film, games, and commercial releases.",
+  alternates: { canonical: "/about" },
+};
 
 // Santi founded Saint's Productions, so he's pinned as the permanent lead
 // panel regardless of how the API orders the list. Everyone else keeps a
@@ -19,7 +27,7 @@ function sortProducers(producers: Producer[]): Producer[] {
 // photos tessellate like a beehive when staggered in HoneycombGrid below.
 const HEX_CLIP = "[clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)]";
 
-function ProducerCell({ producer, size }: { producer: Producer; size: "lg" | "md" }) {
+function ProducerCell({ producer, size, priority }: { producer: Producer; size: "lg" | "md"; priority?: boolean }) {
   const dimensions = size === "lg" ? "w-60 h-60 md:w-72 md:h-72" : "w-48 h-48 md:w-56 md:h-56";
   return (
     <Link href={`/about/${producer.slug}`} className="group flex flex-col items-center gap-4 focus:outline-none">
@@ -29,6 +37,7 @@ function ProducerCell({ producer, size }: { producer: Producer; size: "lg" | "md
           src={producer.image_url}
           alt={producer.name}
           fill
+          priority={priority}
           sizes={size === "lg" ? "(min-width: 768px) 288px, 240px" : "(min-width: 768px) 224px, 192px"}
           className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
         />
@@ -79,7 +88,7 @@ export default async function About() {
         {/* Lead producer (always Santi) sits alone up top */}
         {lead && (
           <div className="flex justify-center mb-16 md:mb-24">
-            <ProducerCell producer={lead} size="lg" />
+            <ProducerCell producer={lead} size="lg" priority />
           </div>
         )}
 

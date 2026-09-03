@@ -43,6 +43,7 @@ export function ProducerBio({ producer, tracks }: Props) {
               src={producer.image_url}
               alt={producer.full_name}
               fill
+              priority
               sizes="(min-width: 768px) 50vw, 100vw"
               className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
             />
