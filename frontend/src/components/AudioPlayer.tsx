@@ -1,7 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Track, audioUrl } from "@/lib/api";
+
+// Module-scoped (shared by every AudioPlayer instance on the page) so
+// starting one track pauses whichever one was already playing, instead of
+// letting multiple <audio> elements play on top of each other.
+let currentlyPlaying: HTMLAudioElement | null = null;
 
 type Props = {
   track: Track;
@@ -16,15 +21,25 @@ export function AudioPlayer({ track, producerName, categoryLabel }: Props) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
 
+  useEffect(() => {
+    // Don't leave a dangling reference to an unmounted <audio> element.
+    return () => {
+      if (currentlyPlaying === audioRef.current) currentlyPlaying = null;
+    };
+  }, []);
+
   function toggle() {
     const audio = audioRef.current;
     if (!audio) return;
-    if (playing) {
-      audio.pause();
-    } else {
+    if (audio.paused) {
+      if (currentlyPlaying && currentlyPlaying !== audio) {
+        currentlyPlaying.pause();
+      }
+      currentlyPlaying = audio;
       audio.play();
+    } else {
+      audio.pause();
     }
-    setPlaying(!playing);
   }
 
   function onTimeUpdate() {
@@ -65,6 +80,8 @@ export function AudioPlayer({ track, producerName, categoryLabel }: Props) {
         onTimeUpdate={onTimeUpdate}
         onLoadedMetadata={onLoadedMetadata}
         onEnded={onEnded}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
         preload="metadata"
       />
 
