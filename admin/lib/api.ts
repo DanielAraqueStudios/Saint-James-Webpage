@@ -136,6 +136,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ name, parent_name: parent_name ?? null }),
     }),
+  renameCategory: (name: string, newName: string) =>
+    request<Category>(`/api/categories/${encodeURIComponent(name)}`, {
+      method: "PUT",
+      body: JSON.stringify({ name: newName }),
+    }),
   deleteCategory: (name: string) =>
     request<{ deleted: boolean }>(`/api/categories/${encodeURIComponent(name)}`, {
       method: "DELETE",

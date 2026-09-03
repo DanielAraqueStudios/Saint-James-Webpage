@@ -10,6 +10,9 @@ export default function CategoriesPage() {
   const [name, setName] = useState("");
   const [parentName, setParentName] = useState(TOP_LEVEL);
   const [creating, setCreating] = useState(false);
+  const [renamingName, setRenamingName] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [renaming, setRenaming] = useState(false);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
 
@@ -39,6 +42,32 @@ export default function CategoriesPage() {
     }
   }
 
+  function startRename(cat: Category) {
+    setRenamingName(cat.name);
+    setRenameValue(cat.name);
+    setError("");
+    setMsg("");
+  }
+
+  async function handleRename(e: React.FormEvent) {
+    e.preventDefault();
+    if (!renamingName || !renameValue.trim()) return;
+    setRenaming(true);
+    setError("");
+    setMsg("");
+    try {
+      await api.renameCategory(renamingName, renameValue.trim());
+      const cats = await api.getCategories();
+      setCategories(cats);
+      setRenamingName(null);
+      setMsg("Category renamed.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to rename category");
+    } finally {
+      setRenaming(false);
+    }
+  }
+
   async function handleDelete(cat: Category) {
     if (cat.track_count > 0) return;
     if (childrenOf(cat.name).length > 0) return;
@@ -63,6 +92,41 @@ export default function CategoriesPage() {
         : childCount > 0
         ? "Delete its subcategories first"
         : "Delete category";
+
+    if (renamingName === cat.name) {
+      return (
+        <form
+          key={cat.name}
+          onSubmit={handleRename}
+          className={`bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-2 ${
+            indent ? "ml-6" : ""
+          }`}
+        >
+          <input
+            autoFocus
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+          />
+          <button
+            type="submit"
+            disabled={renaming}
+            className="text-sm bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={() => setRenamingName(null)}
+            className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+        </form>
+      );
+    }
+
     return (
       <div
         key={cat.name}
@@ -77,14 +141,22 @@ export default function CategoriesPage() {
             {childCount > 0 ? ` · ${childCount} sub${childCount === 1 ? "" : "s"}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => handleDelete(cat)}
-          disabled={disabled}
-          title={disabledReason}
-          className="text-sm bg-red-900 hover:bg-red-800 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg transition-colors"
-        >
-          Delete
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => startRename(cat)}
+            className="text-sm bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Rename
+          </button>
+          <button
+            onClick={() => handleDelete(cat)}
+            disabled={disabled}
+            title={disabledReason}
+            className="text-sm bg-red-900 hover:bg-red-800 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Delete
+          </button>
+        </div>
       </div>
     );
   }
