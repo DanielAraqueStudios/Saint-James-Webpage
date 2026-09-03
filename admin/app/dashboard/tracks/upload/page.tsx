@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { api, Producer } from "@/lib/api";
+import { api, Producer, Category } from "@/lib/api";
 import { ProgressBar } from "@/components/ProgressBar";
 
 const NEW_CATEGORY = "__new__";
@@ -12,7 +12,7 @@ export default function UploadTrackPage() {
   const [producers, setProducers] = useState<Producer[]>([]);
   const [producerSlug, setProducerSlug] = useState("");
   const [title, setTitle] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [categorySelect, setCategorySelect] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -30,7 +30,7 @@ export default function UploadTrackPage() {
       if (p.length > 0) setProducerSlug(p[0].slug);
     });
     api.getCategories().then((cats) => {
-      setCategories(cats.map((c) => c.name));
+      setCategories(cats);
       setCategorySelect(NO_CATEGORY);
     });
   }, []);
@@ -52,9 +52,9 @@ export default function UploadTrackPage() {
     setProgress(0);
 
     try {
-      if (categorySelect === NEW_CATEGORY && !categories.includes(category)) {
-        await api.createCategory(category);
-        setCategories((prev) => [...prev, category].sort());
+      if (categorySelect === NEW_CATEGORY && !categories.some((c) => c.name === category)) {
+        const created = await api.createCategory(category);
+        setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
       }
 
       const form = new FormData();
@@ -119,9 +119,19 @@ export default function UploadTrackPage() {
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
           >
             <option value={NO_CATEGORY}>No category (Other)</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            {categories.filter((c) => !c.parent_name).map((parent) => {
+              const subs = categories.filter((c) => c.parent_name === parent.name);
+              return subs.length > 0 ? (
+                <optgroup key={parent.name} label={parent.name}>
+                  <option value={parent.name}>{parent.name}</option>
+                  {subs.map((sub) => (
+                    <option key={sub.name} value={sub.name}>{sub.name}</option>
+                  ))}
+                </optgroup>
+              ) : (
+                <option key={parent.name} value={parent.name}>{parent.name}</option>
+              );
+            })}
             <option value={NEW_CATEGORY}>+ New category…</option>
           </select>
           {categorySelect === NEW_CATEGORY && (

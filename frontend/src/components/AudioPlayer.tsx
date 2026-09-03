@@ -6,9 +6,11 @@ import { Track, audioUrl } from "@/lib/api";
 type Props = {
   track: Track;
   producerName?: string;
+  /** Display override for the category badge, e.g. "Parent / Sub". Falls back to track.category. */
+  categoryLabel?: string;
 };
 
-export function AudioPlayer({ track, producerName }: Props) {
+export function AudioPlayer({ track, producerName, categoryLabel }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -71,7 +73,7 @@ export function AudioPlayer({ track, producerName }: Props) {
           <p className="font-semibold text-sm truncate">{track.title}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <span className="text-xs bg-saint-purple/30 text-saint-light-blue px-2 py-0.5 rounded-full">
-              {track.category || "Other"}
+              {categoryLabel || track.category || "Other"}
             </span>
             {producerName && (
               <span className="text-xs text-saint-gray">{producerName}</span>

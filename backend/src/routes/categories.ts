@@ -6,32 +6,54 @@ const router = Router();
 
 router.get("/", async (_req: Request, res: Response) => {
   const result = await pool.query(
-    `SELECT c.name, COUNT(t.id)::int AS track_count
+    `SELECT c.name, c.parent_name, COUNT(t.id)::int AS track_count
      FROM categories c
      LEFT JOIN tracks t ON t.category = c.name
-     GROUP BY c.name
-     ORDER BY c.name`
+     GROUP BY c.name, c.parent_name
+     ORDER BY c.parent_name NULLS FIRST, c.name`
   );
   res.json(result.rows);
 });
 
 router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
-  const { name } = req.body as { name?: string };
+  const { name, parent_name } = req.body as { name?: string; parent_name?: string | null };
   if (!name || !name.trim()) {
     res.status(400).json({ error: "name is required" });
     return;
   }
 
+  const trimmedName = name.trim();
+  const parent = parent_name && parent_name.trim() ? parent_name.trim() : null;
+
+  if (parent) {
+    if (parent === trimmedName) {
+      res.status(400).json({ error: "A category cannot be its own parent" });
+      return;
+    }
+    const parentRow = await pool.query(
+      "SELECT parent_name FROM categories WHERE name = $1",
+      [parent]
+    );
+    if (parentRow.rows.length === 0) {
+      res.status(400).json({ error: "Parent category does not exist" });
+      return;
+    }
+    if (parentRow.rows[0].parent_name) {
+      res.status(400).json({ error: "Subcategories can only be one level deep" });
+      return;
+    }
+  }
+
   const result = await pool.query(
-    "INSERT INTO categories (name) VALUES ($1) ON CONFLICT (name) DO NOTHING RETURNING name",
-    [name.trim()]
+    "INSERT INTO categories (name, parent_name) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING RETURNING name, parent_name",
+    [trimmedName, parent]
   );
 
   if (result.rows.length === 0) {
     res.status(409).json({ error: "Category already exists" });
     return;
   }
-  res.status(201).json({ name: result.rows[0].name });
+  res.status(201).json(result.rows[0]);
 });
 
 router.delete("/:name", requireAuth, async (req: AuthRequest, res: Response) => {
@@ -40,6 +62,15 @@ router.delete("/:name", requireAuth, async (req: AuthRequest, res: Response) => 
   ]);
   if ((inUse.rowCount ?? 0) > 0) {
     res.status(409).json({ error: "Category is in use by existing tracks" });
+    return;
+  }
+
+  const hasChildren = await pool.query(
+    "SELECT 1 FROM categories WHERE parent_name = $1 LIMIT 1",
+    [req.params.name]
+  );
+  if ((hasChildren.rowCount ?? 0) > 0) {
+    res.status(409).json({ error: "Category has subcategories — delete those first" });
     return;
   }
 

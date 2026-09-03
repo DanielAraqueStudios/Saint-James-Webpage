@@ -43,6 +43,7 @@ export async function getTracks(params?: { producer?: string; category?: string 
 
 export type Category = {
   name: string;
+  parent_name: string | null;
   track_count: number;
 };
 

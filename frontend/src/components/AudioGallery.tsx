@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Track, Producer } from "@/lib/api";
+import { Track, Producer, Category } from "@/lib/api";
 import { AudioPlayer } from "./AudioPlayer";
 
 const OTHER = "Other";
+const ALL = "All";
 
 type Props = {
   tracks: Track[];
@@ -15,9 +16,9 @@ type Props = {
   /**
    * Full admin-managed category list (from the categories table), so a
    * category shows up as a filter tab even before any track uses it yet.
-   * Falls back to deriving categories from the given tracks when omitted.
+   * Falls back to deriving flat categories from the given tracks when omitted.
    */
-  categoryOptions?: string[];
+  categoryOptions?: Category[];
 };
 
 export function AudioGallery({
@@ -28,9 +29,24 @@ export function AudioGallery({
   categoryOptions,
 }: Props) {
   const hasUncategorized = tracks.some((t) => !t.category);
-  const knownCategories = categoryOptions ?? Array.from(new Set(tracks.map((t) => t.category).filter(Boolean) as string[]));
-  const categories = ["All", ...knownCategories, ...(hasUncategorized ? [OTHER] : [])];
-  const [activeCategory, setActiveCategory] = useState("All");
+
+  const knownCategories: Category[] =
+    categoryOptions ??
+    Array.from(new Set(tracks.map((t) => t.category).filter(Boolean) as string[])).map((name) => ({
+      name,
+      parent_name: null,
+      track_count: 0,
+    }));
+
+  const topLevel = knownCategories.filter((c) => !c.parent_name);
+  const childrenOf = (parent: string) => knownCategories.filter((c) => c.parent_name === parent);
+  const parentOf = (name: string) => knownCategories.find((c) => c.name === name)?.parent_name ?? null;
+
+  const categoryTabs = [ALL, ...topLevel.map((c) => c.name), ...(hasUncategorized ? [OTHER] : [])];
+  const [activeCategory, setActiveCategory] = useState(ALL);
+  const [activeSubcategory, setActiveSubcategory] = useState(ALL);
+
+  const subOptions = activeCategory !== ALL && activeCategory !== OTHER ? childrenOf(activeCategory) : [];
 
   const producerOptions = ["All", ...producers.map((p) => p.slug)];
   const [activeProducer, setActiveProducer] = useState("All");
@@ -39,9 +55,28 @@ export function AudioGallery({
     return producers.find((p) => p.slug === slug)?.name ?? slug;
   }
 
+  function selectCategory(cat: string) {
+    setActiveCategory(cat);
+    setActiveSubcategory(ALL);
+  }
+
+  function categoryLabel(track: Track) {
+    if (!track.category) return undefined;
+    const parent = parentOf(track.category);
+    return parent ? `${parent} / ${track.category}` : undefined;
+  }
+
   const visible = tracks.filter((t) => {
-    const matchesCategory =
-      activeCategory === "All" ? true : activeCategory === OTHER ? !t.category : t.category === activeCategory;
+    let matchesCategory: boolean;
+    if (activeCategory === ALL) {
+      matchesCategory = true;
+    } else if (activeCategory === OTHER) {
+      matchesCategory = !t.category;
+    } else if (activeSubcategory !== ALL) {
+      matchesCategory = t.category === activeSubcategory;
+    } else {
+      matchesCategory = t.category === activeCategory || parentOf(t.category ?? "") === activeCategory;
+    }
     const matchesProducer = activeProducer === "All" ? true : t.producer_slug === activeProducer;
     return matchesCategory && matchesProducer;
   });
@@ -51,10 +86,10 @@ export function AudioGallery({
   return (
     <div>
       <div className="flex flex-wrap gap-2 mb-3">
-        {categories.map((cat) => (
+        {categoryTabs.map((cat) => (
           <button
             key={cat}
-            onClick={() => setActiveCategory(cat)}
+            onClick={() => selectCategory(cat)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               activeCategory === cat
                 ? "bg-saint-light-blue text-saint-matte-black"
@@ -65,6 +100,24 @@ export function AudioGallery({
           </button>
         ))}
       </div>
+
+      {subOptions.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {[ALL, ...subOptions.map((c) => c.name)].map((sub) => (
+            <button
+              key={sub}
+              onClick={() => setActiveSubcategory(sub)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                activeSubcategory === sub
+                  ? "bg-saint-purple text-saint-white"
+                  : "bg-white/5 text-saint-gray hover:bg-white/10"
+              }`}
+            >
+              {sub === ALL ? `All ${activeCategory}` : sub}
+            </button>
+          ))}
+        </div>
+      )}
 
       {showProducerFilter && producers.length > 1 && (
         <div className="flex flex-wrap gap-2 mb-6">
@@ -90,6 +143,7 @@ export function AudioGallery({
             key={track.id}
             track={track}
             producerName={showProducerTag ? producerName(track.producer_slug) : undefined}
+            categoryLabel={categoryLabel(track)}
           />
         ))}
       </div>

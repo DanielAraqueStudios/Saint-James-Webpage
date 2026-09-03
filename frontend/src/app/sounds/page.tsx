@@ -24,7 +24,7 @@ export default async function Sounds() {
           <AudioGallery
             tracks={tracks}
             producers={producers}
-            categoryOptions={categories.map((c) => c.name)}
+            categoryOptions={categories}
             showProducerTag
             showProducerFilter
           />

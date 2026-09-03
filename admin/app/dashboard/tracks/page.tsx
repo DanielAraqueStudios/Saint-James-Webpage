@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, Track } from "@/lib/api";
+import { api, Track, Category } from "@/lib/api";
 
 export default function TracksPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editData, setEditData] = useState<{ title: string; category: string | null }>({
     title: "",
@@ -16,11 +16,17 @@ export default function TracksPage() {
 
   useEffect(() => {
     api.getTracks().then(setTracks);
-    api.getCategories().then((cats) => setCategories(cats.map((c) => c.name)));
+    api.getCategories().then(setCategories);
   }, []);
 
   const producers = [...new Set(tracks.map((t) => t.producer_slug))];
   const visible = filterProducer ? tracks.filter((t) => t.producer_slug === filterProducer) : tracks;
+
+  const categoryByName = new Map(categories.map((c) => [c.name, c]));
+  const groupLabel = (name: string) => {
+    const cat = categoryByName.get(name);
+    return cat?.parent_name ? `${cat.parent_name} / ${cat.name}` : name;
+  };
 
   const grouped = visible.reduce<Record<string, Track[]>>((acc, t) => {
     const key = t.category || "Other";
@@ -28,7 +34,7 @@ export default function TracksPage() {
     return acc;
   }, {});
   const sortedCategories = Object.keys(grouped).sort((a, b) =>
-    a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b)
+    a === "Other" ? 1 : b === "Other" ? -1 : groupLabel(a).localeCompare(groupLabel(b))
   );
 
   async function handleDelete(id: number) {
@@ -66,7 +72,7 @@ export default function TracksPage() {
       <div className="space-y-6">
         {sortedCategories.map((cat) => (
           <div key={cat}>
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">{cat}</h3>
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel(cat)}</h3>
             <div className="space-y-2">
               {grouped[cat].map((t) => (
                 <div key={t.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
@@ -84,9 +90,19 @@ export default function TracksPage() {
                         className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm w-36"
                       >
                         <option value="">No category (Other)</option>
-                        {categories.map((c) => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
+                        {categories.filter((c) => !c.parent_name).map((parent) => {
+                          const subs = categories.filter((c) => c.parent_name === parent.name);
+                          return subs.length > 0 ? (
+                            <optgroup key={parent.name} label={parent.name}>
+                              <option value={parent.name}>{parent.name}</option>
+                              {subs.map((sub) => (
+                                <option key={sub.name} value={sub.name}>{sub.name}</option>
+                              ))}
+                            </optgroup>
+                          ) : (
+                            <option key={parent.name} value={parent.name}>{parent.name}</option>
+                          );
+                        })}
                       </select>
                       <button onClick={() => handleSave(t.id)} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm">Save</button>
                       <button onClick={() => setEditingId(null)} className="bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm">Cancel</button>

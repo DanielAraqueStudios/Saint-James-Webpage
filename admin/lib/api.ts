@@ -131,10 +131,10 @@ export const api = {
     request<{ deleted: boolean }>(`/api/tracks/${id}`, { method: "DELETE" }),
 
   getCategories: () => request<Category[]>("/api/categories"),
-  createCategory: (name: string) =>
-    request<{ name: string }>("/api/categories", {
+  createCategory: (name: string, parent_name?: string | null) =>
+    request<Category>("/api/categories", {
       method: "POST",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, parent_name: parent_name ?? null }),
     }),
   deleteCategory: (name: string) =>
     request<{ deleted: boolean }>(`/api/categories/${encodeURIComponent(name)}`, {
@@ -161,6 +161,7 @@ export type Producer = {
 
 export type Category = {
   name: string;
+  parent_name: string | null;
   track_count: number;
 };
 
