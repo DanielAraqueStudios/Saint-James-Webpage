@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   videoUrl: string;
@@ -10,13 +10,37 @@ type Props = {
   volume: number;
 };
 
-// Browsers block autoplay-with-sound unconditionally, so the <video> below
-// always starts muted — that part isn't configurable. What the admin panel
-// controls is what happens once a visitor clicks unmute: nothing (if the
-// admin turned sound off entirely) or playback at the configured volume.
+// The <video> below always starts with the `muted` attribute so autoplay is
+// guaranteed to work everywhere — that part isn't configurable. When the
+// admin has sound enabled (mutedByDefault === false), we immediately try to
+// flip it to unmuted + play at the configured volume. Most browsers allow
+// that once a visitor has any engagement with the site; when a browser
+// blocks it, play()/pause tells us and we fall back to staying muted with
+// the button offering to unmute — same UI either way, just whichever the
+// browser actually allowed wins.
 export function HeroVideoPlayer({ videoUrl, mutedByDefault, volume }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [unmuted, setUnmuted] = useState(false);
+
+  useEffect(() => {
+    if (mutedByDefault) return;
+    const el = videoRef.current;
+    if (!el) return;
+
+    el.volume = volume;
+    el.muted = false;
+    el
+      .play()
+      .then(() => {
+        if (!el.paused && !el.muted) setUnmuted(true);
+      })
+      .catch(() => {
+        // Browser blocked unmuted autoplay — stay muted, let the visitor
+        // opt in via the button.
+        el.muted = true;
+        setUnmuted(false);
+      });
+  }, [mutedByDefault, volume, videoUrl]);
 
   function handleUnmute() {
     const el = videoRef.current;
