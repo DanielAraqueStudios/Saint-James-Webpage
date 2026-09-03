@@ -86,19 +86,23 @@ export function AudioGallery({
   return (
     <div>
       <div className="flex flex-wrap gap-2 mb-3">
-        {categoryTabs.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => selectCategory(cat)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              activeCategory === cat
-                ? "bg-saint-light-blue text-saint-matte-black"
-                : "bg-white/10 text-saint-gray hover:bg-white/20"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+        {categoryTabs.map((cat) => {
+          const hasSubs = childrenOf(cat).length > 0;
+          return (
+            <button
+              key={cat}
+              onClick={() => selectCategory(cat)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeCategory === cat
+                  ? "bg-saint-light-blue text-saint-matte-black"
+                  : "bg-white/10 text-saint-gray hover:bg-white/20"
+              }`}
+            >
+              {cat}
+              {hasSubs && <span className="ml-1.5 opacity-60">▾</span>}
+            </button>
+          );
+        })}
       </div>
 
       {subOptions.length > 0 && (
