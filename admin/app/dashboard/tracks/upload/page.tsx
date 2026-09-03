@@ -4,8 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { api, Producer, Category } from "@/lib/api";
 import { ProgressBar } from "@/components/ProgressBar";
 import { TrackTrimmer } from "@/components/TrackTrimmer";
+import { CategoryPicker } from "@/components/CategoryPicker";
 
-const NEW_CATEGORY = "__new__";
 const NO_CATEGORY = "";
 const MAX_SIZE_MB = 300;
 
@@ -14,8 +14,7 @@ export default function UploadTrackPage() {
   const [producerSlug, setProducerSlug] = useState("");
   const [title, setTitle] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [categorySelect, setCategorySelect] = useState("");
-  const [newCategory, setNewCategory] = useState("");
+  const [category, setCategory] = useState(NO_CATEGORY);
   const [file, setFile] = useState<File | null>(null);
   const [customize, setCustomize] = useState(false);
   const [trim, setTrim] = useState<{ start: number; end: number } | null>(null);
@@ -25,18 +24,19 @@ export default function UploadTrackPage() {
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const category = categorySelect === NEW_CATEGORY ? newCategory : categorySelect;
-
   useEffect(() => {
     api.getProducers().then((p) => {
       setProducers(p);
       if (p.length > 0) setProducerSlug(p[0].slug);
     });
-    api.getCategories().then((cats) => {
-      setCategories(cats);
-      setCategorySelect(NO_CATEGORY);
-    });
+    api.getCategories().then(setCategories);
   }, []);
+
+  async function handleCreateCategory(name: string, parentName: string | null) {
+    const created = await api.createCategory(name, parentName);
+    setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+    return created;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,21 +45,12 @@ export default function UploadTrackPage() {
       setError(`File is too large (${(file.size / 1024 / 1024).toFixed(0)}MB). Maximum size is ${MAX_SIZE_MB}MB.`);
       return;
     }
-    if (categorySelect === NEW_CATEGORY && !newCategory.trim()) {
-      setError("Please enter a name for the new category");
-      return;
-    }
     setError("");
     setMsg("");
     setUploading(true);
     setProgress(0);
 
     try {
-      if (categorySelect === NEW_CATEGORY && !categories.some((c) => c.name === category)) {
-        const created = await api.createCategory(category);
-        setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
-      }
-
       // multer's disk-storage `destination` callback runs as soon as it hits
       // the "file" field in the multipart stream — fields appended after it
       // aren't parsed yet, so producer_slug must come before file or the
@@ -77,8 +68,6 @@ export default function UploadTrackPage() {
 
       setMsg("Track uploaded successfully!");
       setTitle("");
-      setCategorySelect(category);
-      setNewCategory("");
       setFile(null);
       setCustomize(false);
       setTrim(null);
@@ -126,37 +115,12 @@ export default function UploadTrackPage() {
 
         <div>
           <label className="block text-sm text-gray-400 mb-1">Category (genre)</label>
-          <select
-            value={categorySelect}
-            onChange={(e) => setCategorySelect(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-          >
-            <option value={NO_CATEGORY}>No category (Other)</option>
-            {categories.filter((c) => !c.parent_name).map((parent) => {
-              const subs = categories.filter((c) => c.parent_name === parent.name);
-              return subs.length > 0 ? (
-                <optgroup key={parent.name} label={parent.name}>
-                  <option value={parent.name}>{parent.name}</option>
-                  {subs.map((sub) => (
-                    <option key={sub.name} value={sub.name}>{sub.name}</option>
-                  ))}
-                </optgroup>
-              ) : (
-                <option key={parent.name} value={parent.name}>{parent.name}</option>
-              );
-            })}
-            <option value={NEW_CATEGORY}>+ New category…</option>
-          </select>
-          {categorySelect === NEW_CATEGORY && (
-            <input
-              type="text"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              placeholder="e.g. Cinematic, Hip-Hop, Electronic"
-              className="w-full mt-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-              required
-            />
-          )}
+          <CategoryPicker
+            categories={categories}
+            value={category}
+            onChange={setCategory}
+            onCreate={handleCreateCategory}
+          />
         </div>
 
         <div>
