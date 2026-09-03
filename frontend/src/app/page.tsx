@@ -40,14 +40,9 @@ export default async function Home() {
       <section className="relative min-h-screen w-full overflow-hidden bg-saint-vivid-black">
         <HeroVideoPlayer videoUrl={video_url} mutedByDefault={muted} volume={volume} />
         <div className="pointer-events-none absolute inset-0 bg-saint-vivid-black/20" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] bg-gradient-to-t from-saint-vivid-black/80 via-saint-vivid-black/10 to-transparent px-6 pb-16 pt-32 md:px-16">
-          <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-widest text-saint-white">
-            Saints <span className="text-saint-light-blue">Productions</span>
-          </h1>
-          <p className="mt-3 max-w-xl text-saint-light text-lg leading-relaxed">
-            Sonic architecture and production services.
-          </p>
-        </div>
+        {/* Real heading for SEO/screen readers — kept off-screen so the hero
+            looks exactly as it did before (video only, no overlaid text). */}
+        <h1 className="sr-only">Saints Productions — Sonic architecture and production services.</h1>
       </section>
 
       <Footer />
