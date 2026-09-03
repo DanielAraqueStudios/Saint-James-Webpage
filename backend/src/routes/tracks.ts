@@ -129,6 +129,21 @@ router.post("/", requireAuth, (req: AuthRequest, res: Response, next) => {
     return;
   }
 
+  // Safety net: multer's diskStorage picks a destination folder from
+  // producer_slug the moment it sees the "file" field in the multipart
+  // stream, before any field appended after it has been parsed — so a
+  // client that puts "file" before "producer_slug" in its FormData silently
+  // lands here in a wrong directory (see the "unknown" fallback above). Self
+  // heal regardless of client field order instead of trusting it.
+  const correctDir = path.join(process.cwd(), "uploads", producer_slug);
+  if (req.file.destination !== correctDir) {
+    fs.mkdirSync(correctDir, { recursive: true });
+    const correctPath = path.join(correctDir, req.file.filename);
+    fs.renameSync(req.file.path, correctPath);
+    req.file.path = correctPath;
+    req.file.destination = correctDir;
+  }
+
   const start = trim_start !== undefined ? Number(trim_start) : undefined;
   const end = trim_end !== undefined ? Number(trim_end) : undefined;
   const hasTrim = start !== undefined && end !== undefined && !Number.isNaN(start) && !Number.isNaN(end);

@@ -60,8 +60,11 @@ export default function UploadTrackPage() {
         setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
       }
 
+      // multer's disk-storage `destination` callback runs as soon as it hits
+      // the "file" field in the multipart stream — fields appended after it
+      // aren't parsed yet, so producer_slug must come before file or the
+      // backend falls back to an "unknown" directory.
       const form = new FormData();
-      form.append("file", file);
       form.append("title", title);
       form.append("category", category);
       form.append("producer_slug", producerSlug);
@@ -69,6 +72,7 @@ export default function UploadTrackPage() {
         form.append("trim_start", trim.start.toString());
         form.append("trim_end", trim.end.toString());
       }
+      form.append("file", file);
       await api.uploadTrack(form, setProgress);
 
       setMsg("Track uploaded successfully!");
